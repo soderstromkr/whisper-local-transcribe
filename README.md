@@ -20,8 +20,7 @@ pip install -U openai-whisper
 ```
 git clone https://github.com/soderstromkr/transcribe.git
 ```
-and use the example.ipynb template to use the script.   
-OR download the .py file into your work folder. Then you can either import it to another script or notebook for use. I recommend jupyter notebook for new users.
+and use the example.ipynb template to use the script **OR** download the ```transcribe.py``` file into your work folder. Then you can either import it to another script or notebook for use. I recommend jupyter notebook for new users.
 
 ### Example
 See the [example](example.ipynb) implementation on jupyter notebook.
