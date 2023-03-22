@@ -17,11 +17,10 @@ def transcribe(path, file_type, model=None, language=None, verbose=True):
     print('Expecting {} language, you can change this by specifying language="English". None will try to auto-detect'.format(language))
     print('Verbosity is {}. If TRUE it will print out the text as it is transcribed, you can turn this off by setting verbose=False'.format(verbose))
     print('\nThere are {} {} files in path: {}\n\n'.format(len(glob_file), file_type, path))
+    
     print('Loading model...')
     model = whisper.load_model(model)
-    
-    
-    
+        
     for idx,file in enumerate(glob_file):
         title = os.path.basename(file).split('.')[0]
         
