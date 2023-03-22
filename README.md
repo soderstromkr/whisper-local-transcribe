@@ -16,4 +16,5 @@ Users might not need to specifically install Transfomers. However, a conda insta
 ```
 pip install -U openai-whisper
 ```
-
+### Example
+See the [example](example.ipynb) implementation on jupyter notebook.
