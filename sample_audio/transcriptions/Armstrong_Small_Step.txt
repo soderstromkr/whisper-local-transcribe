@@ -1,0 +1,3 @@
+Armstrong_Small_Step
+In seconds:
+[0.00 --> 24.00]: That's one small step for man, one giant leap for mankind.
