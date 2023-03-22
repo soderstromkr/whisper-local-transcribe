@@ -1,5 +1,5 @@
 ## transcribe
-Simple implementation of OpenAI's Whisper to transcribe audio files from your local folders. 
+Simple script that uses OpenAI's Whisper to transcribe audio files from your local folders. 
 
 ### Instructions 
 #### Requirements
