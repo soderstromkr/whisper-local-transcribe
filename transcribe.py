@@ -25,7 +25,7 @@ def transcribe(path, file_type, model=None, language=None, verbose=True):
     for idx,file in enumerate(glob_file):
         title = os.path.basename(file).split('.')[0]
         
-        print('Transcribing file number number {}: {}'.format(idx+1,file))
+        print('Transcribing file number number {}: {}'.format(idx+1,title))
         print('Model and file loaded...\nStarting transcription...\n')
         result = model.transcribe(
             file, 
@@ -48,4 +48,4 @@ def transcribe(path, file_type, model=None, language=None, verbose=True):
                 
         print('\nFinished file number {}.\n\n\n'.format(idx+1))
 
-    return 'Finished transcription, files can be found in {}'.format(path)    
+    return 'Finished transcription, files can be found in {}transcriptions'.format(path)    
