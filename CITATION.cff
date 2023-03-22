@@ -1,11 +1,11 @@
 cff-version: 1.2.0
-message: "If you use find this implementation useful in your research, please cite it as below."
+message: "If you use find this implementation useful in your research, and want to cite it, please do so as below."
 authors:
 - family-names: "Söderström"
   given-names: "Kristofer Rolf"
   orcid: "https://orcid.org/0000-0002-5322-3350"
 title: "transcribe"
 version: 1.0
-doi: None
+doi: 10.5281/zenodo.7760511
 date-released: 2023-03-22
 url: "https://github.com/soderstromkr/transcribe"
