@@ -22,6 +22,6 @@ git clone https://github.com/soderstromkr/transcribe.git
 and use the example.ipynb template to use the script **OR (for beginners)** download the ```transcribe.py``` file into your work folder. Then you can either import it to another script or notebook for use. I recommend jupyter notebook for new users, see the example below. (Remember to have transcribe.py and example.ipynb in the same working folder).
 
 ### Example
-See the [example](example.ipynb) implementation on jupyter notebook[^2]. 
+See the [example](example.ipynb) implementation on jupyter notebook. 
 
 [^1]: Advanced users can use ```pip install ffmpeg-python``` but be ready to deal with some [PATH issues](https://stackoverflow.com/questions/65836756/python-ffmpeg-wont-accept-path-why), which I encountered in Windows 11.
