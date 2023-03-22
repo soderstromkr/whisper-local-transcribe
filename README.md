@@ -25,3 +25,5 @@ and use the example.ipynb template to use the script **OR (for beginners)** down
 See the [example](example.ipynb) implementation on jupyter notebook. 
 
 [^1]: Advanced users can use ```pip install ffmpeg-python``` but be ready to deal with some [PATH issues](https://stackoverflow.com/questions/65836756/python-ffmpeg-wont-accept-path-why), which I encountered in Windows 11.
+
+[![DOI](https://zenodo.org/badge/617404576.svg)](https://zenodo.org/badge/latestdoi/617404576)
