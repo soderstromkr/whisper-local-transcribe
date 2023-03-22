@@ -1,0 +1,3 @@
+audio_1
+In seconds:
+[0.00 --> 16.00]: Hej, jag heter Axel Pettersson, jag föddes i Örebro 1976. Jag har varit Wikipedia sen 2008 och jag har översatt röstintroduktionsprojektet till svenska.

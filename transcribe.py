@@ -1,10 +1,9 @@
 import whisper 
 import glob, os
 
-def transcribe(path, file_type, model='base', language=None, verbose=True):
-  '''Implementation of OpenAI's whisper model. Downloads model, transcribes audio files
-  in a folder and returns the text files with transcriptions.'''
-    
+def transcribe(path, file_type, model=None, language=None, verbose=True):
+    '''Implementation of OpenAI's whisper model. Downloads model, transcribes audio files in a folder and returns the text files with transcriptions'''
+
     try:
         os.mkdir('{}transcriptions'.format(path))
     except FileExistsError:
