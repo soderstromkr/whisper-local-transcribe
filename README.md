@@ -1,5 +1,7 @@
 ## transcribe
 Simple script that uses OpenAI's Whisper to transcribe audio files from your local folders. 
+## Note
+This implementation and guide is mostly made for researchers not familiar with programming that want a way to transcribe their files locally, without internet connection, usually required within ethical data practices and frameworks. Two examples are shown, a normal workflow with interent connection. And one in which the model is loaded first, via openai-whisper, and then the transcription can be done without being connected to the internet. 
 
 ### Instructions 
 #### Requirements
