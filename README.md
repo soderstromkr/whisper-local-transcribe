@@ -16,13 +16,7 @@ Users might not need to specifically install Transfomers. However, a conda insta
 ```
 pip install -U openai-whisper
 ```
-#### Using the script
-This is a simple script with no installation. You can either clone the repository with
-```
-git clone https://github.com/soderstromkr/transcribe.git
-```
-and use the example.ipynb template to use the script **OR (for beginners)** download the ```transcribe.py``` file into your work folder. Then you can either import it to another script or notebook for use. I recommend jupyter notebook for new users, see the example below. (Remember to have transcribe.py and example.ipynb in the same working folder).
-3. There is an option to run a batch file, whihch launches a GUI built on TKinter and TTKthemes. If using these options, make sure they are installed in your python build. You can install them via pip.
+4. There is an option to run a batch file, whihch launches a GUI built on TKinter and TTKthemes. If using these options, make sure they are installed in your python build. You can install them via pip.
 ```
 pip install tk
 ```
@@ -30,7 +24,13 @@ and
 ```
 pip install ttkthemes 
 ```
-
+#### Using the script
+This is a simple script with no installation. You can either clone the repository with
+```
+git clone https://github.com/soderstromkr/transcribe.git
+```
+and use the example.ipynb template to use the script.**OR (for beginners)** download the ```transcribe.py``` file into your work folder. Then you can either import it to another script or notebook for use. I recommend jupyter notebook for new users, see the example below. (Remember to have transcribe.py and example.ipynb in the same working folder).  
+You can also run the GUI version from your terminal or with the batch file called run_gui.bat, just make sure to add your conda path to it. 
 ### Example
 See [example](example.ipynb) for an implementation on jupyter notebook, also added an example for a simple [workaround](example_no_internet.ipynb) to transcribe while offline. 
 
