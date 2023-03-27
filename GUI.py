@@ -14,11 +14,11 @@ class App:
         self.master = master
         master.title("Local Transcribe")
 
-        #style = ttk.Style()
-        #style.configure('TLabel', font=('Arial', 10), padding=10)
-        #style.configure('TEntry', font=('Arial', 10), padding=10)
-        #style.configure('TButton', font=('Arial', 10), padding=10)
-        #style.configure('TCheckbutton', font=('Arial', 10), padding=10)
+        style = ttk.Style()
+        style.configure('TLabel', font=('Arial', 10), padding=10)
+        style.configure('TEntry', font=('Arial', 10), padding=10)
+        style.configure('TButton', font=('Arial', 10), padding=10)
+        style.configure('TCheckbutton', font=('Arial', 10), padding=10)
 
         # Folder Path
         path_frame = ttk.Frame(master, padding=10)
@@ -95,6 +95,5 @@ class App:
 if __name__ == "__main__":
 #    root = tk.Tk()
     root = ThemedTk(theme="clearlooks")
-    root.geometry("300x200")
     app = App(root) 
     root.mainloop()
