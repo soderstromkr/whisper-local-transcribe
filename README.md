@@ -1,7 +1,7 @@
 ## transcribe
 Simple script that uses OpenAI's Whisper to transcribe audio files from your local folders. 
 ## Note
-This implementation and guide is mostly made for researchers not familiar with programming that want a way to transcribe their files locally, without internet connection, usually required within ethical data practices and frameworks. Two examples are shown, a normal workflow with interent connection. And one in which the model is loaded first, via openai-whisper, and then the transcription can be done without being connected to the internet. 
+This implementation and guide is mostly made for researchers not familiar with programming that want a way to transcribe their files locally, without internet connection, usually required within ethical data practices and frameworks. Two examples are shown, a normal workflow with internet connection. And one in which the model is loaded first, via openai-whisper, and then the transcription can be done without being connected to the internet. 
 
 ### Instructions 
 #### Requirements
@@ -16,7 +16,7 @@ Users might not need to specifically install Transfomers. However, a conda insta
 ```
 pip install -U openai-whisper
 ```
-4. There is an option to run a batch file, whihch launches a GUI built on TKinter and TTKthemes. If using these options, make sure they are installed in your python build. You can install them via pip.
+4. There is an option to run a batch file, which launches a GUI built on TKinter and TTKthemes. If using these options, make sure they are installed in your python build. You can install them via pip.
 ```
 pip install tk
 ```
