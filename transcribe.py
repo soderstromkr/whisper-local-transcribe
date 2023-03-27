@@ -5,13 +5,12 @@ def transcribe(path, file_type, model=None, language=None, verbose=True):
     '''Implementation of OpenAI's whisper model. Downloads model, transcribes audio files in a folder and returns the text files with transcriptions'''
 
     try:
-        os.mkdir('{}transcriptions'.format(path))
+        os.mkdir('{}/transcriptions'.format(path))
     except FileExistsError:
         pass
     
     glob_file = glob.glob(path+'/*{}'.format(file_type))
-    path = path
-    
+        
     print('Using {} model, you can change this by specifying model="medium" for example'.format(model))
     print('Only looking for file type {}, you can change this by specifying file_type="mp3"'.format(file_type))    
     print('Expecting {} language, you can change this by specifying language="English". None will try to auto-detect'.format(language))
@@ -39,7 +38,7 @@ def transcribe(path, file_type, model=None, language=None, verbose=True):
             end.append(result['segments'][i]['end'])
             text.append(result['segments'][i]['text'])
         
-        with open("{}transcriptions/{}.txt".format(path,title), 'w', encoding='utf-8') as file:
+        with open("{}/transcriptions/{}.txt".format(path,title), 'w', encoding='utf-8') as file:
             file.write(title)
             file.write('\nIn seconds:')
             for i in range(len(result['segments'])):
@@ -47,4 +46,4 @@ def transcribe(path, file_type, model=None, language=None, verbose=True):
                 
         print('\nFinished file number {}.\n\n\n'.format(idx+1))
 
-    return 'Finished transcription, files can be found in {}transcriptions'.format(path)    
+    return 'Finished transcription, files can be found in {}/transcriptions'.format(path)    
