@@ -1,7 +1,7 @@
 import whisper 
 import glob, os
 
-def transcribe(path, file_type, model=None, language=None, verbose=True):
+def transcribe(path, file_type, model=None, language=None, verbose=False):
     '''Implementation of OpenAI's whisper model. Downloads model, transcribes audio files in a folder and returns the text files with transcriptions'''
 
     try:
@@ -11,10 +11,10 @@ def transcribe(path, file_type, model=None, language=None, verbose=True):
     
     glob_file = glob.glob(path+'/*{}'.format(file_type))
         
-    print('Using {} model, you can change this by specifying model="medium" for example'.format(model))
-    print('Only looking for file type {}, you can change this by specifying file_type="mp3"'.format(file_type))    
-    print('Expecting {} language, you can change this by specifying language="English". None will try to auto-detect'.format(language))
-    print('Verbosity is {}. If TRUE it will print out the text as it is transcribed, you can turn this off by setting verbose=False'.format(verbose))
+    print('Using {} model'.format(model))
+    print('File type is {}'.format(file_type))    
+    print('Language is being detected automatically for each file')
+    print('Verbosity is set to {}'.format(verbose))
     print('\nThere are {} {} files in path: {}\n\n'.format(len(glob_file), file_type, path))
     
     print('Loading model...')
@@ -28,7 +28,7 @@ def transcribe(path, file_type, model=None, language=None, verbose=True):
         result = model.transcribe(
             file, 
             language=language, 
-            verbose=True
+            verbose=verbose
         )
         start=[]
         end=[]

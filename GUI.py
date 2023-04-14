@@ -14,6 +14,7 @@ class App:
         self.master = master
         master.title("Local Transcribe")
 
+        #style options
         style = ttk.Style()
         style.configure('TLabel', font=('Arial', 10), padding=10)
         style.configure('TEntry', font=('Arial', 10), padding=10)

@@ -1,3 +1,5 @@
 Armstrong_Small_Step
 In seconds:
-[0.00 --> 24.00]: That's one small step for man, one giant leap for mankind.
+[0.00 --> 7.00]: I'm going to step off the limb now.
+[7.00 --> 18.00]: That's one small step for man.
+[18.00 --> 24.00]: One giant leap for mankind.
