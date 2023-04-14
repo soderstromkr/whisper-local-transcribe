@@ -30,12 +30,13 @@ This is a simple script with no installation. You can either clone the repositor
 git clone https://github.com/soderstromkr/transcribe.git
 ```
 and use the example.ipynb template to use the script.
-**OR** download the ```transcribe.py``` file into your work folder. Then you can either import it to another script or notebook for use. I recommend jupyter notebook for new users, see the example below. (Remember to have transcribe.py and example.ipynb in the same working folder).    
-#### GUI 
+**OR** download the ```transcribe.py``` file into your work folder. Then you can either import it to another script or notebook for use. I recommend jupyter notebook for new users, see the example below. (Remember to have transcribe.py and example.ipynb in the same working folder). 
+#### Example with jupyter notebook 
+See [example](example.ipynb) for an implementation on jupyter notebook, also added an example for a simple [workaround](example_no_internet.ipynb) to transcribe while offline. 
+#### Using the GUI 
 You can also run the GUI version from your terminal running ```python GUI.py``` or with the batch file called run_gui.bat, just make sure to add your conda path to it. If you want to download a model first, and then go offline for transcription, I recommend running the model with the default sample folder, which will download the model locally. The GUI should look like this:  
 ![python GUI.py](gui_jpeg.jpg?raw=true)
-### Example
-See [example](example.ipynb) for an implementation on jupyter notebook, also added an example for a simple [workaround](example_no_internet.ipynb) to transcribe while offline. 
+
 
 [^1]: Advanced users can use ```pip install ffmpeg-python``` but be ready to deal with some [PATH issues](https://stackoverflow.com/questions/65836756/python-ffmpeg-wont-accept-path-why), which I encountered in Windows 11.
 
