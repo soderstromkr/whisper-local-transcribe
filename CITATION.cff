@@ -5,7 +5,7 @@ authors:
   given-names: "Kristofer Rolf"
   orcid: "https://orcid.org/0000-0002-5322-3350"
 title: "transcribe"
-version: 1.1.0
+version: 1.1.1
 doi: 10.5281/zenodo.7760511
 date-released: 2023-03-22
 url: "https://github.com/soderstromkr/transcribe"
