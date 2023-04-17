@@ -1,6 +1,0 @@
-### Steps to make command file executable 
-To make a file executable on a Mac, you need to open a terminal window in the directory where the file is located. Then run the following command: 
-
-chmod +x run_MAC_2.command
-
-After running this command, the file should be marked as executable and you should be able to run it by double-clicking on it.
