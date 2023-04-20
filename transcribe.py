@@ -1,5 +1,7 @@
 import whisper 
 import glob, os
+#import torch #uncomment if using torch with cuda, below too
+import datetime
 
 def transcribe(path, file_type, model=None, language=None, verbose=False):
     '''Implementation of OpenAI's whisper model. Downloads model, transcribes audio files in a folder and returns the text files with transcriptions'''
@@ -10,6 +12,11 @@ def transcribe(path, file_type, model=None, language=None, verbose=False):
         pass
     
     glob_file = glob.glob(path+'/*{}'.format(file_type))
+
+    #if torch.cuda.is_available():
+    #    generator = torch.Generator('cuda').manual_seed(42)
+    #else:
+    #    generator = torch.Generator().manual_seed(42)
         
     print('Using {} model'.format(model))
     print('File type is {}'.format(file_type))    
@@ -34,15 +41,15 @@ def transcribe(path, file_type, model=None, language=None, verbose=False):
         end=[]
         text=[]
         for i in range(len(result['segments'])):
-            start.append(result['segments'][i]['start'])
-            end.append(result['segments'][i]['end'])
+            start.append(str(datetime.timedelta(seconds=(result['segments'][i]['start']))))
+            end.append(str(datetime.timedelta(seconds=(result['segments'][i]['end']))))
             text.append(result['segments'][i]['text'])
         
         with open("{}/transcriptions/{}.txt".format(path,title), 'w', encoding='utf-8') as file:
             file.write(title)
             file.write('\nIn seconds:')
             for i in range(len(result['segments'])):
-                file.writelines('\n[{:.2f} --> {:.2f}]:{}'.format(start[i], end[i], text[i]))
+                file.writelines('\n[{} --> {}]:{}'.format(start[i], end[i], text[i]))
                 
         print('\nFinished file number {}.\n\n\n'.format(idx+1))
 
