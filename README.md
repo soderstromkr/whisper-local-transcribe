@@ -61,6 +61,10 @@ The GUI should look like this:
 
 ![python GUI.py](gui_jpeg.jpg?raw=true)
 
+or this, on a Mac, by running `python GUI.py` or `python3 GUI.py`:
+
+![python GUI Mac.py](gui-mac.png)
+
 [^1]: Advanced users can use ```pip install ffmpeg-python``` but be ready to deal with some [PATH issues](https://stackoverflow.com/questions/65836756/python-ffmpeg-wont-accept-path-why), which I encountered in Windows 11.
 
 [![DOI](https://zenodo.org/badge/617404576.svg)](https://zenodo.org/badge/latestdoi/617404576)
