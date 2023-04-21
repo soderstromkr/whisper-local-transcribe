@@ -55,7 +55,7 @@ See [example](example.ipynb) for an implementation on Jupyter Notebook, also add
 
 #### Using the GUI
 
-You can also run the GUI version from your terminal running ```python GUI.py``` or with the batch file called run_Windows.bat (for Windows user, Mac users should read the text file for instructions), just make sure to add your conda path to it. If you want to download a model first, and then go offline for transcription, I recommend running the model with the default sample folder, which will download the model locally. 
+You can also run the GUI version from your terminal running ```python GUI.py``` or with the batch file called run_Windows.bat (for Windows users), just make sure to add your conda path to it. If you want to download a model first, and then go offline for transcription, I recommend running the model with the default sample folder, which will download the model locally. 
 
 The GUI should look like this:
 
