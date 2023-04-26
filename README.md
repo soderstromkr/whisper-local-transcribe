@@ -40,14 +40,16 @@ pip install ttkthemes
 
 #### Using the script
 
-This is a simple script with no installation. You can either clone the repository with
+This is a simple script with no installation. You can download the zip folder and extract it to your preferred working folder.
+
+![](Picture1.png)  
+
+Or by cloning the repository with:
 
 ```
 git clone https://github.com/soderstromkr/transcribe.git
 ```
 
-and use the example.ipynb template to use the script,
-**OR** download the ```transcribe.py``` file into your work folder. Then you can either import it to another script or notebook for use. I recommend [Jupyter Notebook](https://jupyter.org/) for new users, see the example below. (Remember to have `transcribe.py` and `example.ipynb` in the same working folder).
 
 #### Example with Jupyter Notebook
 
