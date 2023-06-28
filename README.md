@@ -1,6 +1,6 @@
-## transcribe
+## Local Transcribe
 
-Simple script that uses OpenAI's Whisper to transcribe audio files from your local folders. 
+Local Transcribe uses OpenAI's Whisper to transcribe audio files from your local folders, creating text files on disk. 
 
 ## Note
 
