@@ -6,7 +6,7 @@ Local Transcribe with Whisper is a user-friendly desktop application that allows
     1. File type: You no longer need to specify file type. The program will only transcribe elligible files.
     2. Language: Added option to specify language, which might help in some cases. Clear the default text to run automatic language recognition.
     3. Model selection: Now a dropdown option that includes most models for typical use. 
-2. New and improved GUI.
+2. New and improved GUI.  
 ![python GUI.py](images/gui-windows.png)
 3. Executable: On Windows and don't want to install python? Try the Exe file! See below for instructions (Experimental)
 
