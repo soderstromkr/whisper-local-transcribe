@@ -21,8 +21,8 @@ Local Transcribe with Whisper is a user-friendly desktop application that allows
 
 ## Installation
 ### Get the files
-Download the zip folder and extract it to your preferred working folder.
-![](Picture1.png)  
+Download the zip folder and extract it to your preferred working folder.  
+![](images/Picture1.png)  
 Or by cloning the repository with:
 ```
 git clone https://github.com/soderstromkr/transcribe.git
