@@ -1,4 +1,4 @@
 Axel_Pettersson_röstinspelning
-In seconds:
-[0.00 --> 6.14]: Hej, jag heter Axel Pettersson. Jag följer bror 1976.
-[6.40 --> 15.10]: Jag har varit vikerpedjan sen 2008 och jag har översatt röstintroduktionsprojektet till svenska.
+[0:00:00 --> 0:00:06]: Hej, jag heter Raxel Patterson, jag får att se över UR 1976.
+[0:00:06 --> 0:00:12.540000]: Jag har varit Wikipedia-périonsen 2018 och jag har översat röst-intro-
+[0:00:12.540000 --> 0:00:15.540000]:-projektet till svenska.
