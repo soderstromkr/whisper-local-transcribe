@@ -30,8 +30,7 @@ git clone https://github.com/soderstromkr/transcribe.git
 ### Executable Version **(Experimental. Windows only)**
 The executable version of Local Transcribe with Whisper is a standalone program and should work out of the box. This experimental version is available if you have Windows, and do not have (or don't want to install) python and additional dependencies. However, it requires more disk space (around 1Gb), has no GPU acceleration and has only been lightly tested for bugs, etc. Let me know if you run into any issues! 
 1. Download the project folder. As the image above shows.
-2. Navigate to build.
-3. Unzip the folder (get a coffee or a tea, this might take a while depending on your computer)
+2. Find and unzip build.zip (get a coffee or a tea, this might take a while depending on your computer)
 3. Run the executable (app.exe) file.
 ### Python Version **(any platform including Mac users)**
 This is recommended if you don't have Windows. Have Windows and use python, or want to use GPU acceleration (Pytorch and Cuda) for faster transcriptions. I would generally recommend this method anyway, but I can understand not everyone wants to go through the installation process for Python, Anaconda and the other required packages. 
