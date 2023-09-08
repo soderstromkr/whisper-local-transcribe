@@ -5,5 +5,5 @@ Unfortunately, I have not found a permament solution for this, not being a Mac u
     1. You can also right-click (or equivalent) on the root folder to open a Terminal within the folder.
 2. Run the following command:
 ```
-python main.py
+python app.py
 ```
