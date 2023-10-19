@@ -92,7 +92,7 @@ class App:
         self.progress_bar.start()
         # Setting path and files
         glob_file = get_path(path)
-        info_path = 'I will transcribe all eligible audio/video files in the path: {}\n\nContinue?'.format(path)
+        info_path = 'Continue?'
         answer = messagebox.askyesno("Confirmation", info_path)
         if not answer:
             self.progress_bar.stop()
@@ -107,7 +107,7 @@ class App:
             messagebox.showinfo("Files not found error!", 'Nothing found, choose another folder.')
             pass
         except ValueError:
-            messagebox.showinfo("Language error!", 'See {} for supported languages'.format(error_language))
+            messagebox.showinfo("Invalid language name, you might have to clear the default text to continue!")
         # Hide progress bar
         self.progress_bar.stop()
         self.progress_bar.pack_forget()
