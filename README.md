@@ -8,7 +8,6 @@ Local Transcribe with Whisper is a user-friendly desktop application that allows
     3. Model selection: Now a dropdown option that includes most models for typical use. 
 2. New and improved GUI.  
 ![python GUI.py](images/gui-windows.png)
-3. Executable: On Windows and don't want to install python? Try the Exe file! See below for instructions (Experimental)
 
 ## Features
 * Select the folder containing the audio or video files you want to transcribe. Tested with m4a video. 
@@ -27,11 +26,6 @@ Or by cloning the repository with:
 ```
 git clone https://github.com/soderstromkr/transcribe.git
 ```
-### Executable Version **(Experimental. Windows only)**
-The executable version of Local Transcribe with Whisper is a standalone program and should work out of the box. This experimental version is available if you have Windows, and do not have (or don't want to install) python and additional dependencies. However, it requires more disk space (around 1Gb), has no GPU acceleration and has only been lightly tested for bugs, etc. Let me know if you run into any issues! 
-1. Download the project folder. As the image above shows.
-2. Find and unzip build.zip (get a coffee or a tea, this might take a while depending on your computer)
-3. Run the executable (app.exe) file.
 ### Python Version **(any platform including Mac users)**
 This is recommended if you don't have Windows. Have Windows and use python, or want to use GPU acceleration (Pytorch and Cuda) for faster transcriptions. I would generally recommend this method anyway, but I can understand not everyone wants to go through the installation process for Python, Anaconda and the other required packages. 
 1. This script was made and tested in an Anaconda environment with Python 3.10. I recommend this method if you're not familiar with Python.
@@ -45,9 +39,9 @@ conda install -c conda-forge ffmpeg-python
 ```
 pip install -U openai-whisper
 ```
-4. To run the app built on TKinter and TTKthemes. If using these options, make sure they are installed in your Python build. You can install them via pip.
+4. To run the app built on TKinter and TTKthemes. If using these options, make sure they are installed in your Python build. You can install them and colorama via pip.
 ```
-pip install tkinter
+pip install colorama
 ```
 and
 ```
