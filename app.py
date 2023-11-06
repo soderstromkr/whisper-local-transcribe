@@ -5,9 +5,10 @@ from tkinter import messagebox
 from src._LocalTranscribe import transcribe, get_path
 import customtkinter
 import threading
-from colorama import Back, Fore
+from colorama import Back
 import colorama
 colorama.init(autoreset=True)
+import os 
 
 
 
@@ -72,7 +73,8 @@ class App:
     # Helper functions
     # Browsing
     def browse(self):
-        folder_path = filedialog.askdirectory()
+        initial_dir = os.getcwd()
+        folder_path = filedialog.askdirectory(initialdir=initial_dir)
         self.path_entry.delete(0, tk.END)
         self.path_entry.insert(0, folder_path)
     # Start transcription
@@ -92,15 +94,8 @@ class App:
         self.progress_bar.start()
         # Setting path and files
         glob_file = get_path(path)
-        info_path = 'Continue?'
-        answer = messagebox.askyesno("Confirmation", info_path)
-        if not answer:
-            self.progress_bar.stop()
-            self.progress_bar.pack_forget()
-            self.transcribe_button.configure(state=tk.NORMAL)
-            return
+        messagebox.showinfo("Message", "Starting transcription!")
         # Start transcription
-        error_language = 'https://github.com/openai/whisper#available-models-and-languages'
         try:
             output_text = transcribe(path, glob_file, model, language, verbose)
         except UnboundLocalError:
