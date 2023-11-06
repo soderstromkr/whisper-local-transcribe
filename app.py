@@ -42,7 +42,8 @@ class App:
         language_frame.pack(fill=tk.BOTH, padx=10, pady=10)
         customtkinter.CTkLabel(language_frame, text="Language:", font=font).pack(side=tk.LEFT, padx=5)
         self.language_entry = customtkinter.CTkEntry(language_frame, width=50, font=('Roboto', 12, 'italic'))
-        self.language_entry.insert(0, 'Select language or clear to detect automatically')
+        self.default_language_text = "Enter language (or ignore to auto-detect)"
+        self.language_entry.insert(0, self.default_language_text)
         self.language_entry.bind('<FocusIn>', on_entry_click)
         self.language_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
         # Model frame
@@ -87,7 +88,10 @@ class App:
     def transcribe_thread(self):
         path = self.path_entry.get()
         model = self.model_combobox.get()
-        language = self.language_entry.get() or None
+        language = self.language_entry.get()
+        # Check if the language field has the default text or is empty
+        if language == self.default_language_text or not language.strip():
+            language = None  # This is the same as passing nothing
         verbose = self.verbose_var.get()
         # Show progress bar
         self.progress_bar.pack(fill=tk.X, padx=5, pady=5)
