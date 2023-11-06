@@ -98,7 +98,7 @@ class App:
         self.progress_bar.start()
         # Setting path and files
         glob_file = get_path(path)
-        messagebox.showinfo("Message", "Starting transcription!")
+        #messagebox.showinfo("Message", "Starting transcription!")
         # Start transcription
         try:
             output_text = transcribe(path, glob_file, model, language, verbose)
