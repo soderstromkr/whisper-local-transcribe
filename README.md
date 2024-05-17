@@ -36,19 +36,11 @@ From the Anaconda Prompt (which should now be installed in your system, find it 
 ```
 conda install -c conda-forge ffmpeg-python
 ```
-3. The main functionality comes from openai-whisper. See their [page](https://github.com/openai/whisper) for details. As of 2023-03-22 you can install via:
+3. The main functionality comes from openai-whisper. See their [page](https://github.com/openai/whisper) for details. It also uses some additional packages (colorama, and customtkinter), install them with the following command:
 ```
-pip install -U openai-whisper
+pip install -r requirements.txt
 ```
-4. To run the app built on TKinter and TTKthemes. If using these options, make sure they are installed in your Python build. You can install them and colorama via pip.
-```
-pip install colorama
-```
-and
-```
-pip install customtkinter 
-```
-5. Run the app: 
+4. Run the app: 
     1. For **Windows**: In the same folder as the *app.py* file, run the app from Anaconda prompt by running
 ```python app.py```
 or with the batch file called run_Windows.bat (for Windows users), which assumes you have conda installed and in the base environment (This is for simplicity, but users are usually adviced to create an environment, see [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands) for more info) just make sure you have the correct environment (right click on the file and press edit to make any changes). 
