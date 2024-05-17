@@ -27,12 +27,12 @@ Or by cloning the repository with:
 git clone https://github.com/soderstromkr/transcribe.git
 ```
 ### Python Version **(any platform including Mac users)**
-1. This script was made and tested in an Anaconda environment with Python 3.10. I recommend this method if you're not familiar with Python.
-See [here](https://docs.anaconda.com/anaconda/install/index.html) for instructions. You might need administrator rights. 
-2. Whisper requires some additional libraries. The [setup](https://github.com/openai/whisper#setup) page states: "The codebase also depends on a few Python packages, most notably HuggingFace Transformers for their fast tokenizer implementation and ffmpeg-python for reading audio files."
+1. This script was made and tested in an Anaconda environment with Python 3.10. I recommend miniconda for a smaller installation, and if you're not familiar with Python.
+See [here](https://docs.anaconda.com/free/miniconda/miniconda-install/) for instructions. You will **need administrator rights**. 
+2. Whisper also requires some additional libraries. The [setup](https://github.com/openai/whisper#setup) page states: "The codebase also depends on a few Python packages, most notably HuggingFace Transformers for their fast tokenizer implementation and ffmpeg-python for reading audio files."
 Users might not need to specifically install Transfomers. However, a conda installation might be needed for ffmpeg[^1], which takes care of setting up PATH variables.
 
-From the anaconda prompt, type or copy the following:
+From the Anaconda Prompt (which should now be installed in your system, find it with the search function), type or copy the following:
 ```
 conda install -c conda-forge ffmpeg-python
 ```
