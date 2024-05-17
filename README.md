@@ -49,8 +49,12 @@ and
 pip install customtkinter 
 ```
 5. Run the app: 
-    1. For **Windows**: In the same folder as the *app.py* file, run the app from terminal by running ```python app.py``` or with the batch file called run_Windows.bat (for Windows users), which assumes you have conda installed and in the base environment (This is for simplicity, but users are usually adviced to create an environment, see [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands) for more info) just make sure you have the correct environment (right click on the file and press edit to make any changes). If you want to download a model first, and then go offline for transcription, I recommend running the model with the default sample folder, which will download the model locally. 
-    2. For **Mac**: Haven't figured out a better way to do this, see [the instructions here](Mac_instructions.md)
+    1. For **Windows**: In the same folder as the *app.py* file, run the app from Anaconda prompt by running
+```python app.py```
+or with the batch file called run_Windows.bat (for Windows users), which assumes you have conda installed and in the base environment (This is for simplicity, but users are usually adviced to create an environment, see [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands) for more info) just make sure you have the correct environment (right click on the file and press edit to make any changes). 
+    3. For **Mac**: Haven't figured out a better way to do this, see [the instructions here](Mac_instructions.md)
+
+    **Note** If you want to download a model first, and then go offline for transcription, I recommend running the model with the default sample folder, which will download the model locally. 
 ## Usage
 1. When launched, the app will also open a terminal that shows some additional information.
 2. Select the folder containing the audio or video files you want to transcribe by clicking the "Browse" button next to the "Folder" label. This will open a file dialog where you can navigate to the desired folder. Remember, you won't be choosing individual files but whole folders!
