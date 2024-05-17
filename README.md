@@ -36,7 +36,8 @@ From the Anaconda Prompt (which should now be installed in your system, find it 
 ```
 conda install -c conda-forge ffmpeg-python
 ```
-You can also choose not to use Anaconda (or miniconda), and use Python. In that case, you need to [download and install FFMPEG](https://ffmpeg.org/download.html) (and potentially add it to your PATH). See here for [WikiHow instructions](https://www.wikihow.com/Install-FFmpeg-on-Windows).
+You can also choose not to use Anaconda (or miniconda), and use Python. In that case, you need to [download and install FFMPEG](https://ffmpeg.org/download.html) (and potentially add it to your PATH). See here for [WikiHow instructions](https://www.wikihow.com/Install-FFmpeg-on-Windows)
+
 3. The main functionality comes from openai-whisper. See their [page](https://github.com/openai/whisper) for details. It also uses some additional packages (colorama, and customtkinter), install them with the following command:
 ```
 pip install -r requirements.txt
