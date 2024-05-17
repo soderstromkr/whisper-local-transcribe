@@ -27,7 +27,6 @@ Or by cloning the repository with:
 git clone https://github.com/soderstromkr/transcribe.git
 ```
 ### Python Version **(any platform including Mac users)**
-This is recommended if you don't have Windows. Have Windows and use python, or want to use GPU acceleration (Pytorch and Cuda) for faster transcriptions. I would generally recommend this method anyway, but I can understand not everyone wants to go through the installation process for Python, Anaconda and the other required packages. 
 1. This script was made and tested in an Anaconda environment with Python 3.10. I recommend this method if you're not familiar with Python.
 See [here](https://docs.anaconda.com/anaconda/install/index.html) for instructions. You might need administrator rights. 
 2. Whisper requires some additional libraries. The [setup](https://github.com/openai/whisper#setup) page states: "The codebase also depends on a few Python packages, most notably HuggingFace Transformers for their fast tokenizer implementation and ffmpeg-python for reading audio files."
