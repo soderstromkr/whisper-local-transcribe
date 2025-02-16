@@ -74,7 +74,7 @@ def transcribe(path, glob_file, model=None, language=None, verbose=False, max_se
     return f'Finished transcription, {len(files_transcripted)} files in {path}/transcriptions'
 
 def process_segment_with_duration(segment, max_duration, start_list, end_list, text_list):
-    words = segment.get('text', [])
+    words = segment.get('words', [])
     if not words:
         start_list.append(str(datetime.timedelta(seconds=segment['start'])))
         end_list.append(str(datetime.timedelta(seconds=segment['end'])))
