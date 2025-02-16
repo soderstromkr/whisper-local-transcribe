@@ -20,24 +20,25 @@ class App:
     def __init__(self, master):
         print(Back.CYAN + "Welcome to Local Transcribe with Whisper!\U0001f600\nCheck back here to see some output from your transcriptions.\nDon't worry, they will also be saved on the computer!\U0001f64f")
         self.master = master
-        # Change font
-        font = ('Roboto', 13, 'bold')  # Change the font and size here
-        font_b = ('Roboto', 12)  # Change the font and size here
-        # Folder Path
+        font = ('Roboto', 13, 'bold')  
+        font_b = ('Roboto', 12)  
         path_frame = customtkinter.CTkFrame(master)
         path_frame.pack(fill=tk.BOTH, padx=10, pady=10)
         customtkinter.CTkLabel(path_frame, text="Folder:", font=font).pack(side=tk.LEFT, padx=5)
         self.path_entry = customtkinter.CTkEntry(path_frame, width=50, font=font_b)
         self.path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
         customtkinter.CTkButton(path_frame, text="Browse", command=self.browse, font=font).pack(side=tk.LEFT, padx=5)
-        # Language frame        
-        #thanks to pommicket from Stackoverflow for this fix
+        max_duration_frame = customtkinter.CTkFrame(master)
+        max_duration_frame.pack(fill=tk.BOTH, padx=10, pady=10)
+        customtkinter.CTkLabel(max_duration_frame, text="Max Segment (sec):", font=font).pack(side=tk.LEFT, padx=5)
+        self.max_duration_entry = customtkinter.CTkEntry(max_duration_frame, width=50, placeholder_text="0 = no limit", font=font_b)
+        self.max_duration_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)        
         def on_entry_click(event):
             """function that gets called whenever entry is clicked"""        
             global firstclick
-            if firstclick: # if this is the first time they clicked it
+            if firstclick:
                 firstclick = False
-                self.language_entry.delete(0, "end") # delete all the text in the entry
+                self.language_entry.delete(0, "end") 
         language_frame = customtkinter.CTkFrame(master)
         language_frame.pack(fill=tk.BOTH, padx=10, pady=10)
         customtkinter.CTkLabel(language_frame, text="Language:", font=font).pack(side=tk.LEFT, padx=5)
@@ -56,13 +57,18 @@ class App:
         self.model_combobox = customtkinter.CTkComboBox(
             model_frame, width=50, state="readonly",
             values=models, font=font_b)
-        self.model_combobox.set(models[1])  # Set the default value
+        self.model_combobox.set(models[1])  
         self.model_combobox.pack(side=tk.LEFT, fill=tk.X, expand=True)
         # Verbose frame
         verbose_frame = customtkinter.CTkFrame(master)
         verbose_frame.pack(fill=tk.BOTH, padx=10, pady=10)
         self.verbose_var = tk.BooleanVar()
         customtkinter.CTkCheckBox(verbose_frame, text="Output transcription to terminal", variable=self.verbose_var, font=font).pack(side=tk.LEFT, padx=5)
+        #Output Frame
+        output_frame = customtkinter.CTkFrame(master)
+        output_frame.pack(fill=tk.BOTH, padx=10, pady=10)
+        self.srt_var = tk.BooleanVar()
+        customtkinter.CTkCheckBox(output_frame, text="Export as SRT", variable=self.srt_var, font=font).pack(side=tk.LEFT, padx=5)
         # Progress Bar
         self.progress_bar = ttk.Progressbar(master, length=200, mode='indeterminate')
         # Button actions frame
@@ -89,6 +95,7 @@ class App:
         path = self.path_entry.get()
         model = self.model_combobox.get()
         language = self.language_entry.get()
+        srt_format = self.srt_var.get()
         # Check if the language field has the default text or is empty
         if language == self.default_language_text or not language.strip():
             language = None  # This is the same as passing nothing
@@ -98,10 +105,16 @@ class App:
         self.progress_bar.start()
         # Setting path and files
         glob_file = get_path(path)
-        #messagebox.showinfo("Message", "Starting transcription!")
+        try:
+            max_duration_str = self.max_duration_entry.get().strip()
+            max_duration = float(max_duration_str) if max_duration_str else 0
+            max_duration = max_duration if max_duration > 0 else None
+        except ValueError:
+            max_duration = None 
+            messagebox.showwarning("Invalid Duration", "Using default segment duration")
         # Start transcription
         try:
-            output_text = transcribe(path, glob_file, model, language, verbose)
+            output_text = transcribe(path, glob_file, model, language, verbose, max_duration, srt_format)
         except UnboundLocalError:
             messagebox.showinfo("Files not found error!", 'Nothing found, choose another folder.')
             pass
