@@ -4,124 +4,152 @@ from glob import glob
 import whisper
 from torch import cuda, Generator
 import colorama
-from colorama import Back,Fore
+from colorama import Back, Fore
 colorama.init(autoreset=True)
 
 def get_path(path):
     return glob(path + '/*')
 
-def transcribe(path, glob_file, model=None, language=None, verbose=False, max_segment_duration=None, srt_format=False):
-    if cuda.is_available():
-        Generator('cuda').manual_seed(42)
-    else:
-        Generator().manual_seed(42)
-        
+def transcribe(path, glob_file, model=None, language=None, verbose=False, max_segment_duration=None, srt_format=False, min_segment_duration=0):
     device = "cuda" if cuda.is_available() else "cpu"
     print(f"Using {device.upper()} for transcription")
 
-        
     model = whisper.load_model(model).to(device)
     files_transcripted = []
-    
+
     for file in glob_file:
         title = os.path.basename(file).split('.')[0]
-        print(Back.CYAN + '\nTrying to transcribe file named: {}\U0001f550'.format(title))
-        
+        print(Back.CYAN + f'\nTrying to transcribe file named: {title}\U0001f550')
+
         try:
-            # Enable word timestamps if duration control is needed
             transcribe_kwargs = {
                 'language': language,
                 'verbose': verbose,
                 'word_timestamps': max_segment_duration is not None,
-                'fp16': cuda.is_available()  # This enables FP16 when using GPU
+                'fp16': cuda.is_available()
             }
 
             result = model.transcribe(file, **transcribe_kwargs)
-            
             files_transcripted.append(result)
             os.makedirs(f'{path}/transcriptions', exist_ok=True)
-            
-            start, end, text = [], [], []
+
+            segments = []            
             for segment in result['segments']:
                 if max_segment_duration:
-                    process_segment_with_duration(segment, max_segment_duration, start, end, text)
+                    # Pass both max and min durations to the splitting function
+                    segments += split_segment(segment, max_segment_duration, min_duration=min_segment_duration)
                 else:
-                    start.append(str(datetime.timedelta(seconds=segment['start'])))
-                    end.append(str(datetime.timedelta(seconds=segment['end'])))
-                    text.append(segment['text'])
-            
+                    segments.append({
+                        'start': segment['start'],
+                        'end': segment['end'],
+                        'text': segment['text']
+                    })
+
             with open(f"{path}/transcriptions/{title}.{'srt' if srt_format else 'txt'}", 'w', encoding='utf-8') as f:
                 if srt_format:
-                    for i, (s, e, t) in enumerate(zip(start, end, text), start=1):
-                        # Directly use original float values instead of string parsing
-                        start_sec = float(s.split(':')[-1]) if isinstance(s, str) else s
-                        end_sec = float(e.split(':')[-1]) if isinstance(e, str) else e
-                        
+                    for i, seg in enumerate(segments, start=1):
                         f.write(f"{i}\n")
-                        f.write(f"{format_timedelta_srt(datetime.timedelta(seconds=start_sec))} --> "
-                                f"{format_timedelta_srt(datetime.timedelta(seconds=end_sec))}\n")
-                        f.write(f"{t}\n\n")
+                        f.write(f"{format_timedelta_srt(seg['start'])} --> {format_timedelta_srt(seg['end'])}\n")
+                        f.write(f"{seg['text'].strip()}\n\n")
                 else:
                     f.write(title)
-                    for s, e, t in zip(start, end, text):
-                        f.write(f'\n[{s} --> {e}]: {t}')
+                    for seg in segments:
+                        start = str(datetime.timedelta(seconds=seg['start'])).split('.')[0]
+                        end = str(datetime.timedelta(seconds=seg['end'])).split('.')[0]
+                        f.write(f"\n[{start} --> {end}]: {seg['text']}")
 
-                    
         except RuntimeError:
             print(Fore.RED + 'Not a valid file, skipping.')
             continue
 
     return f'Finished transcription, {len(files_transcripted)} files in {path}/transcriptions'
 
-def process_segment_with_duration(segment, max_duration, start_list, end_list, text_list):
+def split_segment(segment, max_duration, min_duration=0):
+    # If the entire segment is already short, return it as is.
+    if segment['end'] - segment['start'] <= max_duration:
+        return [segment]
+    
+    chunks = []
     words = segment.get('words', [])
+    
+    # If word timestamps are not available, use the fallback.
     if not words:
-        start_list.append(str(datetime.timedelta(seconds=segment['start'])))
-        end_list.append(str(datetime.timedelta(seconds=segment['end'])))
-        text_list.append(segment['text'])
-        return
-
-    current_start = None
+        return duration_split(segment, max_duration)
+    
+    current_start = segment['start']
     current_text = []
+    
     for word in words:
-        # Handle cases where word dict might not have 'text' key
-        if 'text' not in word:
-            continue  # Skip words without text
-            
-        word_text = word['text'].strip()
-        if not word_text:  # Skip empty text entries
-            continue
-            
-        word_start = word.get('start')
-        word_end = word.get('end')
-
-        # Skip words missing timestamps
-        if word_start is None or word_end is None:
-            continue
-
-        if current_start is None:
-            current_start = word_start
-            current_end = word_end
-            current_text = [word_text]
+        # If adding this word would exceed max_duration and we have some text accumulated...
+        if (word['end'] - current_start) > max_duration and current_text:
+            chunks.append({
+                'start': current_start,
+                'end': word['start'],  # you might choose to use previous word's end if desired
+                'text': ' '.join(current_text)
+            })
+            current_start = word['start']
+            current_text = [word['text'].strip()]
         else:
-            if (word_end - current_start) <= max_duration:
-                current_end = word_end
-                current_text.append(word_text)
-            else:
-                start_list.append(str(datetime.timedelta(seconds=current_start)).split('.')[0])
-                end_list.append(str(datetime.timedelta(seconds=current_end)))
-                text_list.append(' '.join(current_text))
-                current_start = word_start
-                current_end = word_end
-                current_text = [word_text]
+            current_text.append(word['text'].strip())
+    
+    # Add any remaining words as a chunk.
+    if current_text:
+        chunks.append({
+            'start': current_start,
+            'end': words[-1]['end'],
+            'text': ' '.join(current_text)
+        })
+    
+    # Optionally, merge chunks that are too short
+    if min_duration > 0:
+        chunks = merge_short_chunks(chunks, min_duration)
+    
+    return chunks
 
-    if current_start is not None and current_text:
-        start_list.append(str(datetime.timedelta(seconds=current_start)).split('.')[0])
-        end_list.append(str(datetime.timedelta(seconds=current_end)))
-        text_list.append(' '.join(current_text))
+def merge_short_chunks(chunks, min_duration):
+    if not chunks:
+        return chunks
+    merged = [chunks[0]]
+    for chunk in chunks[1:]:
+        prev_chunk = merged[-1]
+        # If the duration of the previous chunk is less than min_duration, merge it with the current chunk.
+        if (prev_chunk['end'] - prev_chunk['start']) < min_duration:
+            merged[-1] = {
+                'start': prev_chunk['start'],
+                'end': chunk['end'],
+                'text': prev_chunk['text'] + ' ' + chunk['text']
+            }
+        else:
+            merged.append(chunk)
+    return merged
 
-def format_timedelta_srt(td):
-    """Convert timedelta to SRT format HH:MM:SS,mmm"""
+def duration_split(segment, max_duration):
+    """Fallback splitting when word timestamps are unavailable"""
+    chunks = []
+    start = segment['start']
+    end = segment['end']
+    duration = end - start
+    
+    if duration <= max_duration:
+        return [segment]
+    
+    num_splits = int(duration // max_duration) + 1
+    chunk_duration = duration / num_splits
+    
+    for i in range(num_splits):
+        chunk_start = start + i * chunk_duration
+        chunk_end = min(start + (i+1) * chunk_duration, end)
+        chunks.append({
+            'start': chunk_start,
+            'end': chunk_end,
+            'text': segment['text'][i*len(segment['text'])//num_splits : (i+1)*len(segment['text'])//num_splits]
+        })
+    
+    return chunks
+
+def format_timedelta_srt(seconds):
+    """Directly convert seconds to SRT format"""
+    td = datetime.timedelta(seconds=seconds)
     total_seconds = td.total_seconds()
     hours = int(total_seconds // 3600)
     minutes = int((total_seconds % 3600) // 60)
