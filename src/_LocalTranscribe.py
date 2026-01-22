@@ -40,16 +40,19 @@ def transcribe(path, glob_file, model=None, language=None, verbose=False):
           within the specified path.
 
     """
-    # Check for GPU acceleration
+    # Check for GPU acceleration and set device
     if backends.mps.is_available():
+        device = 'mps'
         Generator('mps').manual_seed(42)
     elif cuda.is_available():
+        device = 'cuda'
         Generator('cuda').manual_seed(42)
     else:
+        device = 'cpu'
         Generator().manual_seed(42)
 
-    # Load model
-    model = whisper.load_model(model)
+    # Load model on the correct device
+    model = whisper.load_model(model, device=device)
     # Start main loop
     files_transcripted=[]   
     for file in glob_file:
