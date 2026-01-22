@@ -49,6 +49,30 @@ or with the batch file called run_Windows.bat (for Windows users), which assumes
     3. For **Mac**: Haven't figured out a better way to do this, see [the instructions here](Mac_instructions.md)
 
     **Note** If you want to download a model first, and then go offline for transcription, I recommend running the model with the default sample folder, which will download the model locally. 
+
+## GPU Support
+This program **does support running on NVIDIA GPUs**, which can significantly speed up transcription times. To use GPU acceleration, you need to have the correct version of PyTorch installed with CUDA support.
+
+### Installing PyTorch with CUDA Support
+If you have an NVIDIA GPU and want to take advantage of GPU acceleration, you can install a CUDA-enabled version of PyTorch using:
+```
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
+
+**Note:** The command above installs PyTorch with CUDA 12.1 support. Make sure your NVIDIA GPU drivers are compatible with CUDA 12.1. You can check your CUDA version by running `nvidia-smi` in your terminal.
+
+If you need a different CUDA version, visit the [PyTorch installation page](https://pytorch.org/get-started/locally/) to generate the appropriate installation command for your system.
+
+### Verifying GPU Support
+After installation, you can verify that PyTorch can detect your GPU by running:
+```python
+import torch
+print(torch.cuda.is_available())  # Should print True if GPU is available
+print(torch.cuda.get_device_name(0))  # Should print your GPU name
+```
+
+If GPU is not detected, the program will automatically fall back to CPU processing, though this will be slower.
+
 ## Usage
 1. When launched, the app will also open a terminal that shows some additional information.
 2. Select the folder containing the audio or video files you want to transcribe by clicking the "Browse" button next to the "Folder" label. This will open a file dialog where you can navigate to the desired folder. Remember, you won't be choosing individual files but whole folders!
