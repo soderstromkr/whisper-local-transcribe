@@ -8,11 +8,12 @@
 Local Transcribe with Whisper is a user-friendly desktop application that allows you to transcribe audio and video files using the Whisper ASR system, powered by [faster-whisper](https://github.com/SYSTRAN/faster-whisper) (CTranslate2). This application provides a graphical user interface (GUI) built with Python and the Tkinter library, making it easy to use even for those not familiar with programming.
 
 ## New in version 2.0!
-1. **Switched to faster-whisper** — up to 4× faster transcription with lower memory usage.
-2. **No separate FFmpeg installation needed** — audio decoding is handled by the bundled PyAV library.
-3. **No admin rights required** — a plain `pip install` covers everything.
-4. **No PyTorch dependency** — dramatically smaller install footprint.
-5. **`tiny` model added** — smallest and fastest option for quick drafts.
+1. **Switched to faster-whisper** — up to 4× faster transcription with lower memory usage, simpler installation.
+2. **Swedish-optimised models** — [KB-Whisper](https://huggingface.co/collections/KBLab/kb-whisper) from the National Library of Sweden (KBLab)
+3. **No separate FFmpeg installation needed** — audio decoding is handled by the bundled PyAV library.
+4. **No admin rights required** — a plain `pip install` covers everything.
+5. **No PyTorch dependency** — dramatically smaller install footprint.
+6. **`tiny` model added** — smallest and fastest option.
 
 ## Features
 * Select the folder containing the audio or video files you want to transcribe. Tested with m4a video. 
