@@ -13,7 +13,9 @@ Local Transcribe with Whisper is a user-friendly desktop application that allows
 3. **No separate FFmpeg installation needed** — audio decoding is handled by the bundled PyAV library.
 4. **No admin rights required** — a plain `pip install` covers everything.
 5. **No PyTorch dependency** — dramatically smaller install footprint.
-6. **`tiny` model added** — smallest and fastest option.
+6. **Integrated console** - all info in the same application.
+7. **`tiny` model added** — smallest and fastest option.
+
 
 ## Features
 * Select the folder containing the audio or video files you want to transcribe. Tested with m4a video. 
