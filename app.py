@@ -52,6 +52,34 @@ customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 firstclick = True
 
+
+def _set_app_icon(root):
+    """Set app icon when supported, without crashing on unsupported platforms."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    icon_path = os.path.join(base_dir, "images", "icon.ico")
+
+    if not os.path.exists(icon_path):
+        return
+
+    try:
+        root.iconbitmap(icon_path)
+    except tk.TclError:
+        # Some Linux Tk builds don't accept .ico for iconbitmap.
+        pass
+
+
+def _apply_display_scaling(root):
+    """Auto-scale UI for high-resolution displays (e.g., 4K)."""
+    try:
+        screen_w = root.winfo_screenwidth()
+        screen_h = root.winfo_screenheight()
+        scale = min(screen_w / 1920.0, screen_h / 1080.0)
+        scale = max(1.0, min(scale, 2.0))
+        customtkinter.set_widget_scaling(scale)
+        customtkinter.set_window_scaling(scale)
+    except Exception:
+        pass
+
 class App:
     def __init__(self, master):
         self.master = master
@@ -184,13 +212,14 @@ class App:
 if __name__ == "__main__":
     # Setting custom themes
     root = customtkinter.CTk()
+    _apply_display_scaling(root)
     root.title("Local Transcribe with Whisper")
     # Geometry — taller to accommodate the embedded console panel
     width, height = 550, 560
     root.geometry('{}x{}'.format(width, height))
     root.minsize(450, 480)
-    # Icon 
-    root.iconbitmap('images/icon.ico')
+    # Icon (best-effort; ignored on platforms/builds without .ico support)
+    _set_app_icon(root)
     # Run
     app = App(root)
     root.mainloop()
