@@ -1,18 +1,24 @@
 ## Local Transcribe with Whisper 
-Local Transcribe with Whisper is a user-friendly desktop application that allows you to transcribe audio and video files using the Whisper ASR system. This application provides a graphical user interface (GUI) built with Python and the Tkinter library, making it easy to use even for those not familiar with programming.
 
-## New in version 1.2!
-1. Simpler usage:
-    1. File type: You no longer need to specify file type. The program will only transcribe elligible files.
-    2. Language: Added option to specify language, which might help in some cases. Clear the default text to run automatic language recognition.
-    3. Model selection: Now a dropdown option that includes most models for typical use. 
-2. New and improved GUI.  
-![python GUI.py](images/gui-windows.png)
+> **⚠ Note for Mac users (Apple Silicon):** This version uses `faster-whisper` (CTranslate2), which does **not** support Apple M-chip GPU acceleration. Transcription will run on CPU, which is slower than OpenAI's Whisper with Metal/CoreML support. The trade-off is a much simpler installation — no conda, no PyTorch, no admin rights. If you'd prefer M-chip GPU acceleration and don't mind a more involved setup, switch to the **classic** release:
+> ```
+> git checkout classic
+> ```
+
+Local Transcribe with Whisper is a user-friendly desktop application that allows you to transcribe audio and video files using the Whisper ASR system, powered by [faster-whisper](https://github.com/SYSTRAN/faster-whisper) (CTranslate2). This application provides a graphical user interface (GUI) built with Python and the Tkinter library, making it easy to use even for those not familiar with programming.
+
+## New in version 2.0!
+1. **Switched to faster-whisper** — up to 4× faster transcription with lower memory usage.
+2. **No separate FFmpeg installation needed** — audio decoding is handled by the bundled PyAV library.
+3. **No admin rights required** — a plain `pip install` covers everything.
+4. **No PyTorch dependency** — dramatically smaller install footprint.
+5. **`tiny` model added** — smallest and fastest option for quick drafts.
 
 ## Features
 * Select the folder containing the audio or video files you want to transcribe. Tested with m4a video. 
 * Choose the language of the files you are transcribing. You can either select a specific language or let the application automatically detect the language.
-* Select the Whisper model to use for the transcription. Available models include "base.en", "base", "small.en", "small", "medium.en", "medium", and "large". Models with .en ending are better if you're transcribing English, especially the base and small models.
+* Select the Whisper model to use for the transcription. Available models include "tiny", "tiny.en", "base", "base.en", "small", "small.en", "medium", "medium.en", "large-v2", and "large-v3". Models with .en ending are better if you're transcribing English, especially the base and small models.
+* **Swedish-optimised models** — [KB-Whisper](https://huggingface.co/collections/KBLab/kb-whisper) from the National Library of Sweden (KBLab) is available in all sizes (tiny → large). These models reduce Word Error Rate by up to 47 % compared to OpenAI Whisper on Swedish speech. The language is set to Swedish automatically when a KB model is selected.
 * Enable the verbose mode to receive detailed information during the transcription process.
 * Monitor the progress of the transcription with the progress bar and terminal. 
 * Confirmation dialog before starting the transcription to ensure you have selected the correct folder.
@@ -27,66 +33,58 @@ Or by cloning the repository with:
 git clone https://github.com/soderstromkr/transcribe.git
 ```
 ### Python Version **(any platform including Mac users)**
-1. This script was made and tested in an Anaconda environment with Python 3.10. I recommend miniconda for a smaller installation, and if you're not familiar with Python.
-See [here](https://docs.anaconda.com/free/miniconda/miniconda-install/) for instructions. You will **need administrator rights**. 
-2. Whisper also requires some additional libraries. The [setup](https://github.com/openai/whisper#setup) page states: "The codebase also depends on a few Python packages, most notably HuggingFace Transformers for their fast tokenizer implementation and ffmpeg-python for reading audio files."
-Users might not need to specifically install Transfomers. However, a conda installation might be needed for ffmpeg[^1], which takes care of setting up PATH variables.
+1. Install Python 3.10 or later. You can download it from [python.org](https://www.python.org/downloads/). During installation, **check "Add Python to PATH"**. No administrator rights are needed if you install for your user only.
 
-From the Anaconda Prompt (which should now be installed in your system, find it with the search function), type or copy the following:
+2. Run the installer. Open a terminal (Command Prompt on Windows, Terminal on Mac/Linux) in the project folder and run:
 ```
-conda install -c conda-forge ffmpeg-python
+python install.py
 ```
-You can also choose not to use Anaconda (or miniconda), and use Python. In that case, you need to [download and install FFMPEG](https://ffmpeg.org/download.html) (and potentially add it to your PATH). See here for [WikiHow instructions](https://www.wikihow.com/Install-FFmpeg-on-Windows)
+This will:
+- Install all required packages (including bundled FFmpeg — no separate install needed)
+- **Auto-detect your NVIDIA GPU** and ask if you want GPU acceleration
+- No conda, no admin rights required
 
-3. The main functionality comes from openai-whisper. See their [page](https://github.com/openai/whisper) for details. It also uses some additional packages (colorama, and customtkinter), install them with the following command:
-```
-pip install -r requirements.txt
-```
-4. Run the app: 
-    1. For **Windows**: In the same folder as the *app.py* file, run the app from Anaconda prompt by running
-```python app.py```
-or with the batch file called run_Windows.bat (for Windows users), which assumes you have conda installed and in the base environment (This is for simplicity, but users are usually adviced to create an environment, see [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands) for more info) just make sure you have the correct environment (right click on the file and press edit to make any changes). 
-    3. For **Mac**: Haven't figured out a better way to do this, see [the instructions here](Mac_instructions.md)
+Alternatively, you can install manually with `pip install -r requirements.txt`.
 
-    **Note** If you want to download a model first, and then go offline for transcription, I recommend running the model with the default sample folder, which will download the model locally. 
+3. Run the app: 
+    1. For **Windows**: double-click `run_Windows.bat` (it will auto-install on first run) or run:
+```
+python app.py
+```
+    2. For **Mac / Linux**: run `./run_Mac.sh` (auto-installs on first run). See [Mac instructions](Mac_instructions.md) for details.
+
+    **Note** The first run with a given model will download it (~75 MB for base, ~500 MB for medium). After that, everything works offline.
 
 ## GPU Support
-This program **does support running on NVIDIA GPUs**, which can significantly speed up transcription times. To use GPU acceleration, you need to have the correct version of PyTorch installed with CUDA support.
+This program **does support running on NVIDIA GPUs**, which can significantly speed up transcription times. faster-whisper uses CTranslate2, which requires NVIDIA CUDA libraries for GPU acceleration.
 
-### Installing PyTorch with CUDA Support
-If you have an NVIDIA GPU and want to take advantage of GPU acceleration, you can install a CUDA-enabled version of PyTorch using:
+### Automatic Detection
+The `install.py` script **automatically detects NVIDIA GPUs** and will ask if you want to install GPU support. If you skipped it during installation, you can add it anytime:
 ```
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install nvidia-cublas-cu12 nvidia-cudnn-cu12
 ```
 
-**Note:** The command above installs PyTorch with CUDA 12.1 support. Make sure your NVIDIA GPU drivers are compatible with CUDA 12.1. You can check your CUDA version by running `nvidia-smi` in your terminal.
-
-If you need a different CUDA version, visit the [PyTorch installation page](https://pytorch.org/get-started/locally/) to generate the appropriate installation command for your system.
+**Note:** Make sure your NVIDIA GPU drivers are up to date. You can check by running `nvidia-smi` in your terminal. The program will automatically detect and use your GPU if available, otherwise it falls back to CPU.
 
 ### Verifying GPU Support
-After installation, you can verify that PyTorch can detect your GPU by running:
+After installation, you can verify that your GPU is available by running:
 ```python
-import torch
-print(torch.cuda.is_available())  # Should print True if GPU is available
-print(torch.cuda.get_device_name(0))  # Should print your GPU name
+import ctranslate2
+print(ctranslate2.get_supported_compute_types("cuda"))
 ```
-
-If GPU is not detected, the program will automatically fall back to CPU processing, though this will be slower.
+If this returns a list containing `"float16"`, GPU acceleration is working.
 
 ## Usage
-1. When launched, the app will also open a terminal that shows some additional information.
+1. Launch the app — the built-in console panel at the bottom shows a welcome message and all progress updates.
 2. Select the folder containing the audio or video files you want to transcribe by clicking the "Browse" button next to the "Folder" label. This will open a file dialog where you can navigate to the desired folder. Remember, you won't be choosing individual files but whole folders!
 3. Enter the desired language for the transcription in the "Language" field. You can either select a language or leave it blank to enable automatic language detection.
 4. Choose the Whisper model to use for the transcription from the dropdown list next to the "Model" label.
-5. Enable the verbose mode by checking the "Verbose" checkbox if you want to receive detailed information during the transcription process.
-6. Click the "Transcribe" button to start the transcription. The button will be disabled during the process to prevent multiple transcriptions at once.
-7. Monitor the progress of the transcription with the progress bar.
-8. Once the transcription is completed, a message box will appear displaying the transcribed text. Click "OK" to close the message box.
-9. You can run the application again or quit the application at any time by clicking the "Quit" button.
+5. Click the "Transcribe" button to start the transcription. The button will be disabled during the process to prevent multiple transcriptions at once.
+6. Monitor progress in the embedded console panel — it shows model loading, per-file progress, and segment timestamps in real time.
+7. Once the transcription is completed, a message box will appear displaying the result. Click "OK" to close it.
+8. You can run the application again or quit at any time by clicking the "Quit" button.
 
 ## Jupyter Notebook
 Don't want fancy EXEs or GUIs? Use the function as is. See [example](example.ipynb) for an implementation on Jupyter Notebook.
-
-[^1]: Advanced users can use ```pip install ffmpeg-python``` but be ready to deal with some [PATH issues](https://stackoverflow.com/questions/65836756/python-ffmpeg-wont-accept-path-why), which I encountered in Windows 11.
 
 [![DOI](https://zenodo.org/badge/617404576.svg)](https://zenodo.org/badge/latestdoi/617404576)

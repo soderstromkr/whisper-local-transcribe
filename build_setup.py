@@ -1,7 +1,7 @@
 from cx_Freeze import setup, Executable
 
 build_exe_options = {
-    "packages": ['whisper','tkinter','customtkinter']
+    "packages": ['faster_whisper','tkinter','customtkinter']
     }
 executables = (
     [
@@ -13,7 +13,7 @@ executables = (
 )
 setup(
     name="Local Transcribe with Whisper",
-    version="1.2",
+    version="2.0",
     author="Kristofer Rolf Söderström",
     options={"build_exe":build_exe_options},
     executables=executables

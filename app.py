@@ -1,3 +1,5 @@
+import os
+import sys
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
@@ -5,10 +7,44 @@ from tkinter import messagebox
 from src._LocalTranscribe import transcribe, get_path
 import customtkinter
 import threading
-from colorama import Back
-import colorama
-colorama.init(autoreset=True)
-import os 
+
+
+# ── Helper: redirect stdout/stderr into a CTkTextbox ──────────────────────
+import re
+_ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')  # strip colour codes
+
+class _ConsoleRedirector:
+    """Redirects output exclusively to the in-app console panel."""
+    def __init__(self, text_widget):
+        self.widget = text_widget
+
+    def write(self, text):
+        clean = _ANSI_RE.sub('', text)        # strip ANSI colours
+        if clean.strip() == '':
+            return
+        # Schedule UI update on the main thread
+        try:
+            self.widget.after(0, self._append, clean)
+        except Exception:
+            pass
+
+    def _append(self, text):
+        self.widget.configure(state='normal')
+        self.widget.insert('end', text + ('\n' if not text.endswith('\n') else ''))
+        self.widget.see('end')
+        self.widget.configure(state='disabled')
+
+    def flush(self):
+        pass
+
+# HuggingFace model IDs for non-standard models
+HF_MODEL_MAP = {
+    'KB Swedish (tiny)':   'KBLab/kb-whisper-tiny',
+    'KB Swedish (base)':   'KBLab/kb-whisper-base',
+    'KB Swedish (small)':  'KBLab/kb-whisper-small',
+    'KB Swedish (medium)': 'KBLab/kb-whisper-medium',
+    'KB Swedish (large)':  'KBLab/kb-whisper-large',
+}
 
 
 
@@ -18,7 +54,6 @@ firstclick = True
 
 class App:
     def __init__(self, master):
-        print(Back.CYAN + "Welcome to Local Transcribe with Whisper!\U0001f600\nCheck back here to see some output from your transcriptions.\nDon't worry, they will also be saved on the computer!\U0001f64f")
         self.master = master
         # Change font
         font = ('Roboto', 13, 'bold')  # Change the font and size here
@@ -28,6 +63,7 @@ class App:
         path_frame.pack(fill=tk.BOTH, padx=10, pady=10)
         customtkinter.CTkLabel(path_frame, text="Folder:", font=font).pack(side=tk.LEFT, padx=5)
         self.path_entry = customtkinter.CTkEntry(path_frame, width=50, font=font_b)
+        self.path_entry.insert(0, os.path.join(os.getcwd(), 'sample_audio'))
         self.path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
         customtkinter.CTkButton(path_frame, text="Browse", command=self.browse, font=font).pack(side=tk.LEFT, padx=5)
         # Language frame        
@@ -47,8 +83,13 @@ class App:
         self.language_entry.bind('<FocusIn>', on_entry_click)
         self.language_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
         # Model frame
-        models = ['base.en', 'base', 'small.en',
-                  'small', 'medium.en', 'medium', 'large']
+        models = ['tiny', 'tiny.en', 'base', 'base.en',
+                  'small', 'small.en', 'medium', 'medium.en',
+                  'large-v2', 'large-v3',
+                  '───────────────',
+                  'KB Swedish (tiny)', 'KB Swedish (base)',
+                  'KB Swedish (small)', 'KB Swedish (medium)',
+                  'KB Swedish (large)']
         model_frame = customtkinter.CTkFrame(master)
         model_frame.pack(fill=tk.BOTH, padx=10, pady=10)
         customtkinter.CTkLabel(model_frame, text="Model:", font=font).pack(side=tk.LEFT, padx=5)
@@ -56,13 +97,8 @@ class App:
         self.model_combobox = customtkinter.CTkComboBox(
             model_frame, width=50, state="readonly",
             values=models, font=font_b)
-        self.model_combobox.set(models[1])  # Set the default value
+        self.model_combobox.set('medium')  # Set the default value
         self.model_combobox.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        # Verbose frame
-        verbose_frame = customtkinter.CTkFrame(master)
-        verbose_frame.pack(fill=tk.BOTH, padx=10, pady=10)
-        self.verbose_var = tk.BooleanVar()
-        customtkinter.CTkCheckBox(verbose_frame, text="Output transcription to terminal", variable=self.verbose_var, font=font).pack(side=tk.LEFT, padx=5)
         # Progress Bar
         self.progress_bar = ttk.Progressbar(master, length=200, mode='indeterminate')
         # Button actions frame
@@ -71,6 +107,23 @@ class App:
         self.transcribe_button = customtkinter.CTkButton(button_frame, text="Transcribe", command=self.start_transcription, font=font)
         self.transcribe_button.pack(side=tk.LEFT, padx=5, pady=10, fill=tk.X, expand=True)
         customtkinter.CTkButton(button_frame, text="Quit", command=master.quit, font=font).pack(side=tk.RIGHT, padx=5, pady=10, fill=tk.X, expand=True)
+
+        # ── Embedded console / log panel ──────────────────────────────────
+        log_label = customtkinter.CTkLabel(master, text="Console output", font=font, anchor='w')
+        log_label.pack(fill=tk.X, padx=12, pady=(8, 0))
+        self.log_box = customtkinter.CTkTextbox(master, height=220, font=('Consolas', 14),
+                                                 wrap='word', state='disabled',
+                                                 fg_color='#1e1e1e', text_color='#e0e0e0')
+        self.log_box.pack(fill=tk.BOTH, expand=True, padx=10, pady=(2, 10))
+
+        # Redirect stdout & stderr into the log panel (no backend console)
+        sys.stdout = _ConsoleRedirector(self.log_box)
+        sys.stderr = _ConsoleRedirector(self.log_box)
+
+        # Welcome message (shown after redirect so it appears in the panel)
+        print("Welcome to Local Transcribe with Whisper! \U0001f600")
+        print("Transcriptions will be saved automatically.")
+        print("─" * 46)
     # Helper functions
     # Browsing
     def browse(self):
@@ -87,12 +140,22 @@ class App:
     # Threading
     def transcribe_thread(self):
         path = self.path_entry.get()
-        model = self.model_combobox.get()
+        model_display = self.model_combobox.get()
+        # Ignore the visual separator
+        if model_display.startswith('─'):
+            messagebox.showinfo("Invalid selection", "Please select a model, not the separator line.")
+            self.transcribe_button.configure(state=tk.NORMAL)
+            return
+        model = HF_MODEL_MAP.get(model_display, model_display)
         language = self.language_entry.get()
+        # Auto-set Swedish for KB models
+        is_kb_model = model_display.startswith('KB Swedish')
         # Check if the language field has the default text or is empty
-        if language == self.default_language_text or not language.strip():
+        if is_kb_model:
+            language = 'sv'
+        elif language == self.default_language_text or not language.strip():
             language = None  # This is the same as passing nothing
-        verbose = self.verbose_var.get()
+        verbose = True   # always show transcription progress in the console panel
         # Show progress bar
         self.progress_bar.pack(fill=tk.X, padx=5, pady=5)
         self.progress_bar.start()
@@ -122,9 +185,10 @@ if __name__ == "__main__":
     # Setting custom themes
     root = customtkinter.CTk()
     root.title("Local Transcribe with Whisper")
-    # Geometry
-    width,height = 450,275
-    root.geometry('{}x{}'.format(width,height))
+    # Geometry — taller to accommodate the embedded console panel
+    width, height = 550, 560
+    root.geometry('{}x{}'.format(width, height))
+    root.minsize(450, 480)
     # Icon 
     root.iconbitmap('images/icon.ico')
     # Run

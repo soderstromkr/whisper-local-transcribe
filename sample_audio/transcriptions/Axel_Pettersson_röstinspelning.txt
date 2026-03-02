@@ -1,4 +1,2 @@
 Axel_Pettersson_röstinspelning
-[0:00:00 --> 0:00:06]: Hej, jag heter Raxel Patterson, jag får att se över UR 1976.
-[0:00:06 --> 0:00:12.540000]: Jag har varit Wikipedia-périonsen 2018 och jag har översat röst-intro-
-[0:00:12.540000 --> 0:00:15.540000]:-projektet till svenska.
+[0:00:00 --> 0:00:15]: Hej, jag heter Axel Pettersson, jag föddes i Örebro 1976. Jag har varit Wikipedia sen 2008 och jag har översatt röstintroduktionsprojektet till svenska.

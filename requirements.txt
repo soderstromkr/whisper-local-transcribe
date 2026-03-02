@@ -1,3 +1,2 @@
-openai-whisper
+faster-whisper
 customtkinter
-colorama

@@ -1,5 +1,23 @@
 @echo off
-echo Starting...
-call conda activate base
-REM OPTION 2 : (KEEP TEXT WITHIN QUOTES AND CHANGE USERNAME) "C:/Users/user/Anaconda3/condabin/activate.bat"
-call python app.py
+REM Create .venv on first run if it doesn't exist
+if not exist ".venv\Scripts\python.exe" (
+    echo Creating virtual environment...
+    python -m venv .venv
+    if errorlevel 1 (
+        echo ERROR: Failed to create virtual environment. Is Python installed and on PATH?
+        pause
+        exit /b 1
+    )
+)
+
+set PYTHON=.venv\Scripts\python.exe
+
+REM Check if dependencies are installed
+%PYTHON% -c "import faster_whisper" 2>nul
+if errorlevel 1 (
+    echo First run detected - running installer...
+    %PYTHON% install.py
+    echo.
+)
+echo Starting Local Transcribe...
+%PYTHON% app.py
