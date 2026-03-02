@@ -46,6 +46,21 @@ Run `./run_Mac.sh` — it will auto-install everything on first run. See [Mac in
 
 > **Note:** The first run with a given model will download it (~75 MB for base, ~500 MB for medium). After that, everything works offline.
 
+### Manual installation (if the launchers don't work)
+If `run_Windows.bat` or `run_Mac.sh` fails (e.g. Python isn't on PATH, or permissions issues), open a terminal in the project folder and run these steps manually:
+```
+python -m venv .venv
+```
+Activate the virtual environment:
+- **Windows:** `.venv\Scripts\activate`
+- **Mac / Linux:** `source .venv/bin/activate`
+
+Then install and run:
+```
+python install.py
+python app.py
+```
+
 ## GPU Support
 This program **does support running on NVIDIA GPUs**, which can significantly speed up transcription times. faster-whisper uses CTranslate2, which requires NVIDIA CUDA libraries for GPU acceleration.
 
