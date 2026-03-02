@@ -36,27 +36,13 @@ Or by cloning the repository with:
 git clone https://github.com/soderstromkr/transcribe.git
 ```
 ### Prerequisites
-1. Install **Python 3.10 or later** from [python.org](https://www.python.org/downloads/). During installation, **check "Add Python to PATH"**. No administrator rights are needed if you install for your user only.
-
-2. Run the installer. Open a terminal in the project folder and run:
-```
-python install.py
-```
-This will:
-- Install all required packages (including bundled FFmpeg — no separate install needed)
-- **Auto-detect your NVIDIA GPU** and ask if you want GPU acceleration
-- No conda, no admin rights required
-
-Alternatively, you can install manually with `pip install -r requirements.txt`.
+Install **Python 3.10 or later** from [python.org](https://www.python.org/downloads/). During installation, **check "Add Python to PATH"**. No administrator rights are needed if you install for your user only.
 
 ### Run on Windows
-Double-click `run_Windows.bat` (it will auto-install on first run) or run:
-```
-python app.py
-```
+Double-click `run_Windows.bat` — it will auto-install everything on first run.
 
 ### Run on Mac / Linux
-Run `./run_Mac.sh` (auto-installs on first run). See [Mac instructions](Mac_instructions.md) for details.
+Run `./run_Mac.sh` — it will auto-install everything on first run. See [Mac instructions](Mac_instructions.md) for details.
 
 > **Note:** The first run with a given model will download it (~75 MB for base, ~500 MB for medium). After that, everything works offline.
 
