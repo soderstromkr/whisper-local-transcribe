@@ -1,6 +1,6 @@
 ## Local Transcribe with Whisper 
 
-> **⚠ Note for Mac users (Apple Silicon):** This version uses `faster-whisper` (CTranslate2), which does **not** support Apple M-chip GPU acceleration. Transcription will run on CPU, which is slower than OpenAI's Whisper with Metal/CoreML support. The trade-off is a much simpler installation — no conda, no PyTorch, no admin rights. If you'd prefer M-chip GPU acceleration and don't mind a more involved setup, switch to the **classic** release:
+> **⚠ Note for Mac users (Apple Silicon):** This version uses `faster-whisper` (CTranslate2), which does **not** support Apple M-chip GPU acceleration. Transcription will run on CPU, which is slower than OpenAI's Whisper with Metal/CoreML support. The trade-off is a much simpler installation — no conda, no PyTorch, no admin rights. If you'd prefer M-chip GPU acceleration and don't mind a more involved setup, switch to the [**classic**](https://github.com/soderstromkr/whisper-local-transcribe/releases/tag/classic) release:
 > ```
 > git checkout classic
 > ```
