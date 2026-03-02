@@ -32,10 +32,10 @@ Or by cloning the repository with:
 ```
 git clone https://github.com/soderstromkr/transcribe.git
 ```
-### Python Version **(any platform including Mac users)**
-1. Install Python 3.10 or later. You can download it from [python.org](https://www.python.org/downloads/). During installation, **check "Add Python to PATH"**. No administrator rights are needed if you install for your user only.
+### Prerequisites
+1. Install **Python 3.10 or later** from [python.org](https://www.python.org/downloads/). During installation, **check "Add Python to PATH"**. No administrator rights are needed if you install for your user only.
 
-2. Run the installer. Open a terminal (Command Prompt on Windows, Terminal on Mac/Linux) in the project folder and run:
+2. Run the installer. Open a terminal in the project folder and run:
 ```
 python install.py
 ```
@@ -46,14 +46,16 @@ This will:
 
 Alternatively, you can install manually with `pip install -r requirements.txt`.
 
-3. Run the app: 
-    1. For **Windows**: double-click `run_Windows.bat` (it will auto-install on first run) or run:
+### Run on Windows
+Double-click `run_Windows.bat` (it will auto-install on first run) or run:
 ```
 python app.py
 ```
-    2. For **Mac / Linux**: run `./run_Mac.sh` (auto-installs on first run). See [Mac instructions](Mac_instructions.md) for details.
 
-    **Note** The first run with a given model will download it (~75 MB for base, ~500 MB for medium). After that, everything works offline.
+### Run on Mac / Linux
+Run `./run_Mac.sh` (auto-installs on first run). See [Mac instructions](Mac_instructions.md) for details.
+
+> **Note:** The first run with a given model will download it (~75 MB for base, ~500 MB for medium). After that, everything works offline.
 
 ## GPU Support
 This program **does support running on NVIDIA GPUs**, which can significantly speed up transcription times. faster-whisper uses CTranslate2, which requires NVIDIA CUDA libraries for GPU acceleration.
