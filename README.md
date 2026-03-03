@@ -36,7 +36,7 @@ Or by cloning the repository with:
 git clone https://github.com/soderstromkr/transcribe.git
 ```
 ### Prerequisites
-Install **Python 3.10 or later** from [python.org](https://www.python.org/downloads/). During installation, **check "Add Python to PATH"**. No administrator rights are needed if you install for your user only.
+Install **Python 3.10 or later**. Some IT policies allow installing from the Microsoft Store or Mac equivalent. However, I would prefer an install from [python.org](https://www.python.org/downloads/). During installation, **check "Add Python to PATH"**. No administrator rights are needed if you install for your user only.
 
 ### Run on Windows
 Double-click `run_Windows.bat` — it will auto-install everything on first run.
