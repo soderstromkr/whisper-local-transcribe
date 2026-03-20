@@ -1,2 +1,4 @@
 Armstrong_Small_Step
-[0:00:00 --> 0:00:07]: That's one small step for man, one giant leap for mankind.
+────────────────────────────────────────
+
+That's one small step for man, one giant leap for mankind.

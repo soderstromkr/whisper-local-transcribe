@@ -127,6 +127,14 @@ class App:
             values=models, font=font_b)
         self.model_combobox.set('medium')  # Set the default value
         self.model_combobox.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        # Timestamps toggle
+        ts_frame = customtkinter.CTkFrame(master)
+        ts_frame.pack(fill=tk.BOTH, padx=10, pady=10)
+        self.timestamps_var = tk.BooleanVar(value=True)
+        self.timestamps_switch = customtkinter.CTkSwitch(
+            ts_frame, text="Include timestamps in transcription",
+            variable=self.timestamps_var, font=font_b)
+        self.timestamps_switch.pack(side=tk.LEFT, padx=5)
         # Progress Bar
         self.progress_bar = ttk.Progressbar(master, length=200, mode='indeterminate')
         # Button actions frame
@@ -184,6 +192,7 @@ class App:
         elif language == self.default_language_text or not language.strip():
             language = None  # This is the same as passing nothing
         verbose = True   # always show transcription progress in the console panel
+        timestamps = self.timestamps_var.get()
         # Show progress bar
         self.progress_bar.pack(fill=tk.X, padx=5, pady=5)
         self.progress_bar.start()
@@ -192,7 +201,7 @@ class App:
         #messagebox.showinfo("Message", "Starting transcription!")
         # Start transcription
         try:
-            output_text = transcribe(path, glob_file, model, language, verbose)
+            output_text = transcribe(path, glob_file, model, language, verbose, timestamps)
         except UnboundLocalError:
             messagebox.showinfo("Files not found error!", 'Nothing found, choose another folder.')
             pass

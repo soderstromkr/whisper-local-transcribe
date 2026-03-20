@@ -91,7 +91,7 @@ def get_path(path):
     return sorted(media_files)
 
 # Main function
-def transcribe(path, glob_file, model=None, language=None, verbose=False):
+def transcribe(path, glob_file, model=None, language=None, verbose=False, timestamps=True):
     """
     Transcribes audio files in a specified folder using faster-whisper (CTranslate2).
 
@@ -182,10 +182,15 @@ def transcribe(path, glob_file, model=None, language=None, verbose=False):
             segment_list = []
             with open("{}/transcriptions/{}.txt".format(path, title), 'w', encoding='utf-8') as f:
                 f.write(title)
+                f.write('\n' + '─' * 40 + '\n')
                 for seg in segments:
-                    start_ts = str(datetime.timedelta(seconds=seg.start))
-                    end_ts = str(datetime.timedelta(seconds=seg.end))
-                    f.write('\n[{} --> {}]:{}'.format(start_ts, end_ts, seg.text))
+                    text = seg.text.strip()
+                    if timestamps:
+                        start_ts = str(datetime.timedelta(seconds=seg.start))
+                        end_ts = str(datetime.timedelta(seconds=seg.end))
+                        f.write('\n[{} --> {}] {}'.format(start_ts, end_ts, text))
+                    else:
+                        f.write('\n{}'.format(text))
                     f.flush()
                     if verbose:
                         print("   [%.2fs → %.2fs] %s" % (seg.start, seg.end, seg.text))
