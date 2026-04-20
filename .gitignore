@@ -24,3 +24,8 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
+
+# Runtime artifacts
+crash.log
+sample_audio/transcriptions/plain/
+sample_audio/transcriptions/with_timestamps/

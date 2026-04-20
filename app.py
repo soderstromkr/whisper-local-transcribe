@@ -7,6 +7,7 @@ from tkinter import messagebox
 from src._LocalTranscribe import transcribe, get_path
 import customtkinter
 import threading
+import queue
 
 
 # ── Helper: redirect stdout/stderr into a CTkTextbox ──────────────────────
@@ -14,28 +15,38 @@ import re
 _ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')  # strip colour codes
 
 class _ConsoleRedirector:
-    """Redirects output exclusively to the in-app console panel."""
-    def __init__(self, text_widget):
-        self.widget = text_widget
+    """Tee Python output to an in-app log queue.
+
+    The real C-level stdout/stderr file descriptors are left untouched
+    so that native libraries (ctranslate2 etc.) can write to them
+    without crashing. Only Python-level print() / sys.stdout.write()
+    is intercepted and forwarded to the UI queue.
+    """
+    def __init__(self, log_queue, real_stream):
+        self._log_queue = log_queue
+        self._real = real_stream
 
     def write(self, text):
-        clean = _ANSI_RE.sub('', text)        # strip ANSI colours
-        if clean.strip() == '':
-            return
-        # Schedule UI update on the main thread
         try:
-            self.widget.after(0, self._append, clean)
+            self._real.write(text)
+        except Exception:
+            pass
+        clean = _ANSI_RE.sub('', text)
+        if not clean:
+            return
+        try:
+            self._log_queue.put_nowait(clean)
         except Exception:
             pass
 
-    def _append(self, text):
-        self.widget.configure(state='normal')
-        self.widget.insert('end', text + ('\n' if not text.endswith('\n') else ''))
-        self.widget.see('end')
-        self.widget.configure(state='disabled')
-
     def flush(self):
-        pass
+        try:
+            self._real.flush()
+        except Exception:
+            pass
+
+    def fileno(self):
+        return self._real.fileno()
 
 # HuggingFace model IDs for non-standard models
 HF_MODEL_MAP = {
@@ -45,6 +56,8 @@ HF_MODEL_MAP = {
     'KB Swedish (medium)': 'KBLab/kb-whisper-medium',
     'KB Swedish (large)':  'KBLab/kb-whisper-large',
 }
+
+WINDOWS_CPU_HINT = ' (CPU on Windows)'
 
 
 
@@ -83,6 +96,7 @@ def _apply_display_scaling(root):
 class App:
     def __init__(self, master):
         self.master = master
+        self.log_queue = queue.Queue()
         # Change font
         font = ('Roboto', 13, 'bold')  # Change the font and size here
         font_b = ('Roboto', 12)  # Change the font and size here
@@ -111,11 +125,11 @@ class App:
         self.language_entry.bind('<FocusIn>', on_entry_click)
         self.language_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
         # Model frame
-        models = ['tiny', 'tiny.en', 'base', 'base.en',
+        models = [f'tiny{WINDOWS_CPU_HINT}', f'tiny.en{WINDOWS_CPU_HINT}', 'base', 'base.en',
                   'small', 'small.en', 'medium', 'medium.en',
                   'large-v2', 'large-v3',
                   '───────────────',
-                  'KB Swedish (tiny)', 'KB Swedish (base)',
+              f'KB Swedish (tiny){WINDOWS_CPU_HINT}', 'KB Swedish (base)',
                   'KB Swedish (small)', 'KB Swedish (medium)',
                   'KB Swedish (large)']
         model_frame = customtkinter.CTkFrame(master)
@@ -127,14 +141,17 @@ class App:
             values=models, font=font_b)
         self.model_combobox.set('medium')  # Set the default value
         self.model_combobox.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        # Timestamps toggle
+        # Output format toggles
         ts_frame = customtkinter.CTkFrame(master)
         ts_frame.pack(fill=tk.BOTH, padx=10, pady=10)
-        self.timestamps_var = tk.BooleanVar(value=True)
-        self.timestamps_switch = customtkinter.CTkSwitch(
-            ts_frame, text="Include timestamps in transcription",
-            variable=self.timestamps_var, font=font_b)
-        self.timestamps_switch.pack(side=tk.LEFT, padx=5)
+        self.ts_with_var = tk.BooleanVar(value=True)
+        self.ts_plain_var = tk.BooleanVar(value=False)
+        customtkinter.CTkSwitch(
+            ts_frame, text="With timestamps",
+            variable=self.ts_with_var, font=font_b).pack(side=tk.LEFT, padx=5)
+        customtkinter.CTkSwitch(
+            ts_frame, text="Without timestamps",
+            variable=self.ts_plain_var, font=font_b).pack(side=tk.LEFT, padx=15)
         # Progress Bar
         self.progress_bar = ttk.Progressbar(master, length=200, mode='indeterminate')
         # Button actions frame
@@ -152,14 +169,80 @@ class App:
                                                  fg_color='#1e1e1e', text_color='#e0e0e0')
         self.log_box.pack(fill=tk.BOTH, expand=True, padx=10, pady=(2, 10))
 
-        # Redirect stdout & stderr into the log panel (no backend console)
-        sys.stdout = _ConsoleRedirector(self.log_box)
-        sys.stderr = _ConsoleRedirector(self.log_box)
+        # Redirect stdout & stderr into the log panel.
+        # Keep real file-descriptor streams alive so native C libraries don't crash.
+        _real_stdout = sys.__stdout__
+        _real_stderr = sys.__stderr__
+        sys.stdout = _ConsoleRedirector(self.log_queue, _real_stdout)
+        sys.stderr = _ConsoleRedirector(self.log_queue, _real_stderr)
+        self.master.after(50, self._drain_log_queue)
 
         # Welcome message (shown after redirect so it appears in the panel)
         print("Welcome to Local Transcribe with Whisper! \U0001f600")
         print("Transcriptions will be saved automatically.")
         print("─" * 46)
+
+    def _drain_log_queue(self):
+        updated = False
+        chunks = []
+        while True:
+            try:
+                chunks.append(self.log_queue.get_nowait())
+            except queue.Empty:
+                break
+
+        if chunks:
+            updated = True
+            self.log_box.configure(state='normal')
+            for chunk in chunks:
+                self.log_box.insert('end', chunk.replace('\r', '\n'))
+            self.log_box.see('end')
+            self.log_box.configure(state='disabled')
+
+        try:
+            self.master.after(50, self._drain_log_queue)
+        except tk.TclError:
+            if updated:
+                return
+
+    def _finish_transcription(self, output_text=None, dialog_title=None, dialog_message=None, is_error=False):
+        self.progress_bar.stop()
+        self.progress_bar.pack_forget()
+        self.transcribe_button.configure(state=tk.NORMAL)
+
+        if dialog_title and dialog_message:
+            dialog = messagebox.showerror if is_error else messagebox.showinfo
+            dialog(dialog_title, dialog_message)
+            return
+
+        if output_text:
+            messagebox.showinfo("Finished!", output_text)
+
+    def _get_transcription_request(self):
+        path = self.path_entry.get()
+        model_display = self.model_combobox.get()
+        if model_display.startswith('─'):
+            messagebox.showinfo("Invalid selection", "Please select a model, not the separator line.")
+            return None
+
+        model_key = model_display.replace(WINDOWS_CPU_HINT, '')
+        model = HF_MODEL_MAP.get(model_key, model_key)
+        language = self.language_entry.get()
+        is_kb_model = model_key.startswith('KB Swedish')
+        if is_kb_model:
+            language = 'sv'
+        elif language == self.default_language_text or not language.strip():
+            language = None
+
+        save_timestamps = self.ts_with_var.get()
+        save_plain = self.ts_plain_var.get()
+        if not save_timestamps and not save_plain:
+            messagebox.showinfo("No output selected", "Enable at least one output format (with or without timestamps).")
+            return None
+
+        glob_file = get_path(path)
+        return path, glob_file, model, language, save_timestamps, save_plain
+
     # Helper functions
     # Browsing
     def browse(self):
@@ -169,56 +252,76 @@ class App:
         self.path_entry.insert(0, folder_path)
     # Start transcription
     def start_transcription(self):
-        # Disable transcribe button
-        self.transcribe_button.configure(state=tk.DISABLED)
-        # Start a new thread for the transcription process
-        threading.Thread(target=self.transcribe_thread).start()
-    # Threading
-    def transcribe_thread(self):
-        path = self.path_entry.get()
-        model_display = self.model_combobox.get()
-        # Ignore the visual separator
-        if model_display.startswith('─'):
-            messagebox.showinfo("Invalid selection", "Please select a model, not the separator line.")
-            self.transcribe_button.configure(state=tk.NORMAL)
+        request = self._get_transcription_request()
+        if request is None:
             return
-        model = HF_MODEL_MAP.get(model_display, model_display)
-        language = self.language_entry.get()
-        # Auto-set Swedish for KB models
-        is_kb_model = model_display.startswith('KB Swedish')
-        # Check if the language field has the default text or is empty
-        if is_kb_model:
-            language = 'sv'
-        elif language == self.default_language_text or not language.strip():
-            language = None  # This is the same as passing nothing
-        verbose = True   # always show transcription progress in the console panel
-        timestamps = self.timestamps_var.get()
-        # Show progress bar
+
+        self.transcribe_button.configure(state=tk.DISABLED)
         self.progress_bar.pack(fill=tk.X, padx=5, pady=5)
         self.progress_bar.start()
-        # Setting path and files
-        glob_file = get_path(path)
-        #messagebox.showinfo("Message", "Starting transcription!")
-        # Start transcription
+        threading.Thread(target=self.transcribe_thread, args=request, daemon=True).start()
+
+    # Threading
+    def transcribe_thread(self, path, glob_file, model, language, save_timestamps, save_plain):
+        verbose = True   # always show transcription progress in the console panel
         try:
-            output_text = transcribe(path, glob_file, model, language, verbose, timestamps)
+            output_text = transcribe(path, glob_file, model, language, verbose,
+                                      save_timestamps=save_timestamps, save_plain=save_plain)
         except UnboundLocalError:
-            messagebox.showinfo("Files not found error!", 'Nothing found, choose another folder.')
-            pass
+            self.master.after(
+                0,
+                self._finish_transcription,
+                None,
+                "Files not found error!",
+                'Nothing found, choose another folder.',
+                False,
+            )
+            return
         except ValueError:
-            messagebox.showinfo("Invalid language name, you might have to clear the default text to continue!")
-        # Hide progress bar
-        self.progress_bar.stop()
-        self.progress_bar.pack_forget()
-        # Enable transcribe button
-        self.transcribe_button.configure(state=tk.NORMAL)
-        # Recover output text
-        try:
-            messagebox.showinfo("Finished!", output_text)
-        except UnboundLocalError:
-            pass
+            self.master.after(
+                0,
+                self._finish_transcription,
+                None,
+                "Error",
+                "Invalid language name, you might have to clear the default text to continue!",
+                False,
+            )
+            return
+        except Exception as exc:
+            print(f"⚠  Unexpected error: {exc}")
+            self.master.after(
+                0,
+                self._finish_transcription,
+                None,
+                "Error",
+                f"Something went wrong:\n{exc}",
+                True,
+            )
+            return
+
+        self.master.after(0, self._finish_transcription, output_text)
 
 if __name__ == "__main__":
+    # ── Global crash handler — log to file so GUI redirect can't hide it ──
+    import traceback as _tb
+    _CRASH_LOG = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'crash.log')
+
+    def _log_unhandled(exc_type, exc_value, exc_tb):
+        msg = ''.join(_tb.format_exception(exc_type, exc_value, exc_tb))
+        try:
+            with open(_CRASH_LOG, 'a', encoding='utf-8') as f:
+                f.write(msg + '\n')
+        except Exception:
+            pass
+        sys.__stderr__.write(msg)
+
+    sys.excepthook = _log_unhandled
+
+    def _thread_excepthook(args):
+        _log_unhandled(args.exc_type, args.exc_value, args.exc_traceback)
+
+    threading.excepthook = _thread_excepthook
+
     # Setting custom themes
     root = customtkinter.CTk()
     _apply_display_scaling(root)

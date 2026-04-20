@@ -58,12 +58,60 @@ def _setup_cuda_libs():
 _setup_cuda_libs()
 
 from faster_whisper import WhisperModel
+from faster_whisper.utils import _MODELS
 
 
 SUPPORTED_EXTENSIONS = {
     ".wav", ".mp3", ".m4a", ".flac", ".ogg", ".wma", ".aac",
     ".mp4", ".mkv", ".mov", ".webm", ".avi", ".mpeg", ".mpg",
 }
+
+
+def _model_is_cached(model_id):
+    """Check whether a model's key file is already in the HuggingFace cache."""
+    try:
+        import re as _re
+        if _re.match(r".*/.*", model_id):
+            repo_id = model_id
+        else:
+            repo_id = _MODELS.get(model_id)
+            if repo_id is None:
+                return False
+        from huggingface_hub import try_to_load_from_cache
+        result = try_to_load_from_cache(repo_id, "model.bin")
+        return isinstance(result, str)
+    except Exception:
+        return False
+
+
+class _DownloadProgressBar:
+    """tqdm-compatible class that prints download progress to stdout."""
+    def __init__(self, *args, **kwargs):
+        self.total = kwargs.get("total", 0)
+        self.desc = kwargs.get("desc", "")
+        self.current = 0
+        self._last_pct = -1
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        if self.total:
+            print("")  # newline after progress
+
+    def update(self, n=1):
+        self.current += n
+        if self.total:
+            pct = int(self.current / self.total * 100)
+            if pct != self._last_pct:
+                self._last_pct = pct
+                print(f"   ⬇  Downloading: {pct}%", end='\r')
+
+    def set_postfix(self, *args, **kwargs):
+        pass
+
+    def close(self):
+        pass
 
 
 def _detect_device():
@@ -76,6 +124,25 @@ def _detect_device():
     except Exception:
         pass
     return "cpu", "int8"
+
+
+def _stabilize_backend(model, device, compute_type):
+    """Avoid known native shutdown crashes on some Windows CUDA model paths."""
+    if sys.platform != "win32" or device != "cuda":
+        return device, compute_type
+
+    model_name = (model or "").lower()
+    tiny_model = (
+        model_name in {"tiny", "tiny.en"}
+        or model_name.endswith("/kb-whisper-tiny")
+        or model_name.endswith("-tiny")
+    )
+    if tiny_model:
+        print("⚠  Using CPU for tiny model on Windows to avoid a known CUDA shutdown crash.")
+        print("   Use base/medium or larger if you want GPU acceleration.")
+        return "cpu", "int8"
+
+    return device, compute_type
 
 
 # Get the path
@@ -91,7 +158,8 @@ def get_path(path):
     return sorted(media_files)
 
 # Main function
-def transcribe(path, glob_file, model=None, language=None, verbose=False, timestamps=True):
+def transcribe(path, glob_file, model=None, language=None, verbose=False,
+               save_timestamps=True, save_plain=True):
     """
     Transcribes audio files in a specified folder using faster-whisper (CTranslate2).
 
@@ -123,12 +191,27 @@ def transcribe(path, glob_file, model=None, language=None, verbose=False, timest
 
     # ── Step 1: Detect hardware ──────────────────────────────────────
     device, compute_type = _detect_device()
+    device, compute_type = _stabilize_backend(model, device, compute_type)
     print(f"⚙  Device: {device}  |  Compute: {compute_type}")
 
     # ── Step 2: Load model ───────────────────────────────────────────
-    print(f"⏳ Loading model '{model}' — downloading if needed...")
+    if _model_is_cached(model):
+        print(f"✅ Model '{model}' found in cache — loading...")
+    else:
+        print(f"⬇  Model '{model}' not cached — downloading (this may take a while)...")
+
+    def _load_model(device, compute_type):
+        import faster_whisper.utils as _fw_utils
+        original_tqdm = _fw_utils.disabled_tqdm
+        if not _model_is_cached(model):
+            _fw_utils.disabled_tqdm = _DownloadProgressBar
+        try:
+            return WhisperModel(model, device=device, compute_type=compute_type)
+        finally:
+            _fw_utils.disabled_tqdm = original_tqdm
+
     try:
-        whisper_model = WhisperModel(model, device=device, compute_type=compute_type)
+        whisper_model = _load_model(device, compute_type)
     except Exception as exc:
         err = str(exc).lower()
         cuda_runtime_missing = (
@@ -146,7 +229,7 @@ def transcribe(path, glob_file, model=None, language=None, verbose=False, timest
         print("⚠  CUDA runtime not available; falling back to CPU (int8).")
         print(f"   Reason: {exc}")
         device, compute_type = "cpu", "int8"
-        whisper_model = WhisperModel(model, device=device, compute_type=compute_type)
+        whisper_model = _load_model(device, compute_type)
     print("✅ Model ready!")
     print(SEP)
 
@@ -176,32 +259,50 @@ def transcribe(path, glob_file, model=None, language=None, verbose=False, timest
                 beam_size=5
             )
             audio_duration = info.duration  # seconds
-            # Make folder if missing
-            os.makedirs('{}/transcriptions'.format(path), exist_ok=True)
+            # Build output directories
+            out_dirs = []
+            if save_timestamps:
+                d = os.path.join(path, 'transcriptions', 'with_timestamps')
+                os.makedirs(d, exist_ok=True)
+                out_dirs.append(('ts', d))
+            if save_plain:
+                d = os.path.join(path, 'transcriptions', 'plain')
+                os.makedirs(d, exist_ok=True)
+                out_dirs.append(('plain', d))
             # Stream segments as they are decoded
             segment_list = []
-            with open("{}/transcriptions/{}.txt".format(path, title), 'w', encoding='utf-8') as f:
-                f.write(title)
-                f.write('\n' + '─' * 40 + '\n')
+            # Open all output files at once so we can write in a single pass
+            handles = {}
+            for kind, d in out_dirs:
+                fh = open(os.path.join(d, title + '.txt'), 'w', encoding='utf-8')
+                fh.write(title)
+                fh.write('\n' + '─' * 40 + '\n')
+                handles[kind] = fh
+            try:
                 for seg in segments:
                     text = seg.text.strip()
-                    if timestamps:
+                    if 'ts' in handles:
                         start_ts = str(datetime.timedelta(seconds=seg.start))
                         end_ts = str(datetime.timedelta(seconds=seg.end))
-                        f.write('\n[{} --> {}] {}'.format(start_ts, end_ts, text))
-                    else:
-                        f.write('\n{}'.format(text))
-                    f.flush()
+                        handles['ts'].write('\n[{} --> {}] {}'.format(start_ts, end_ts, text))
+                        handles['ts'].flush()
+                    if 'plain' in handles:
+                        handles['plain'].write('\n{}'.format(text))
+                        handles['plain'].flush()
                     if verbose:
                         print("   [%.2fs → %.2fs] %s" % (seg.start, seg.end, seg.text))
                     else:
                         print("   Transcribed up to %.0fs..." % seg.end, end='\r')
                     segment_list.append(seg)
+            finally:
+                for fh in handles.values():
+                    fh.close()
             elapsed = time.time() - t_start
             elapsed_min = elapsed / 60.0
             audio_min = audio_duration / 60.0
             ratio = audio_duration / elapsed if elapsed > 0 else float('inf')
-            print(f"✅ Done — saved to transcriptions/{title}.txt")
+            saved_to = ', '.join(kind for kind, _ in out_dirs)
+            print(f"✅ Done — {title}.txt saved ({saved_to})")
             print(f"⏱  Transcribed {audio_min:.1f} min of audio in {elapsed_min:.1f} min  ({ratio:.1f}x realtime)")
             files_transcripted.append(segment_list)
         except Exception as exc:
