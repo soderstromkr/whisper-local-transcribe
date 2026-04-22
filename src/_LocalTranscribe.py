@@ -84,35 +84,6 @@ def _model_is_cached(model_id):
         return False
 
 
-class _DownloadProgressBar:
-    """tqdm-compatible class that prints download progress to stdout."""
-    def __init__(self, *args, **kwargs):
-        self.total = kwargs.get("total", 0)
-        self.desc = kwargs.get("desc", "")
-        self.current = 0
-        self._last_pct = -1
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        if self.total:
-            print("")  # newline after progress
-
-    def update(self, n=1):
-        self.current += n
-        if self.total:
-            pct = int(self.current / self.total * 100)
-            if pct != self._last_pct:
-                self._last_pct = pct
-                print(f"   ⬇  Downloading: {pct}%", end='\r')
-
-    def set_postfix(self, *args, **kwargs):
-        pass
-
-    def close(self):
-        pass
-
 
 def _detect_device():
     """Return (device, compute_type) for the best available backend."""
@@ -201,14 +172,7 @@ def transcribe(path, glob_file, model=None, language=None, verbose=False,
         print(f"⬇  Model '{model}' not cached — downloading (this may take a while)...")
 
     def _load_model(device, compute_type):
-        import faster_whisper.utils as _fw_utils
-        original_tqdm = _fw_utils.disabled_tqdm
-        if not _model_is_cached(model):
-            _fw_utils.disabled_tqdm = _DownloadProgressBar
-        try:
-            return WhisperModel(model, device=device, compute_type=compute_type)
-        finally:
-            _fw_utils.disabled_tqdm = original_tqdm
+        return WhisperModel(model, device=device, compute_type=compute_type)
 
     try:
         whisper_model = _load_model(device, compute_type)
